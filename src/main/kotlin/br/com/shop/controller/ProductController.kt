@@ -1,8 +1,12 @@
 package br.com.shop.controller
 
+import br.com.shop.model.Cart
 import br.com.shop.model.Product
 import br.com.shop.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.hateoas.server.ExposesResourceFor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,8 +25,10 @@ class ProductController {
     lateinit var productService: ProductService
 
     @GetMapping
-    fun list(): List<Product>{
-        return productService.list()
+    fun list(): ResponseEntity<Page<Product>> {
+        val pageable: Pageable = PageRequest.of(0, 10)
+        val products: Page<Product> = productService.findAll(pageable)
+        return ResponseEntity(products, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
