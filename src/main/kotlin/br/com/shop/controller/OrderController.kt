@@ -1,5 +1,6 @@
 package br.com.shop.controller
 
+import br.com.shop.dto.OrderDto
 import br.com.shop.model.Cart
 import br.com.shop.model.Order
 import br.com.shop.service.OrderService
@@ -21,20 +22,25 @@ class OrderController {
     lateinit var orderService: OrderService
 
     @GetMapping
-    fun list(): ResponseEntity<Page<Order>> {
+    fun findAll(): ResponseEntity<Page<OrderDto>> {
         val pageable: Pageable = PageRequest.of(0, 10)
         val orders: Page<Order> = orderService.findAll(pageable)
-        return ResponseEntity(orders, HttpStatus.OK)
+        val ordersDto: Page<OrderDto> = OrderDto.converter(orders)
+        return ResponseEntity(ordersDto, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
-    fun findById(@PathVariable id:Long): ResponseEntity<Order> {
-        return ResponseEntity(orderService.findById(id), HttpStatus.OK)
+    fun findById(@PathVariable id:Long): ResponseEntity<OrderDto> {
+        val order = orderService.findById(id)
+        val orderDto: OrderDto = OrderDto(order)
+        return ResponseEntity(orderDto, HttpStatus.OK)
     }
 
     @PostMapping
-    fun save(@RequestBody @PathVariable order: Order): ResponseEntity<Order> {
-        return ResponseEntity(orderService.save(order), HttpStatus.CREATED)
+    fun save(@RequestBody @PathVariable orderDto: OrderDto): ResponseEntity<OrderDto> {
+        val order = orderDto.converter()
+        val orderDto = OrderDto(orderService.save(order))
+        return ResponseEntity(orderDto, HttpStatus.CREATED)
     }
 
     @DeleteMapping(path = ["/{id}"])
@@ -43,8 +49,9 @@ class OrderController {
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id:Long, @RequestBody order: Order): ResponseEntity<Order> {
-        order.id = id
-        return ResponseEntity(orderService.save(order), HttpStatus.NO_CONTENT)
+    fun replace(@PathVariable id:Long, @RequestBody orderDto: OrderDto): ResponseEntity<OrderDto> {
+        val order = orderDto.converter(id)
+        val orderDto = OrderDto(orderService.save(order))
+        return ResponseEntity(orderDto, HttpStatus.NO_CONTENT)
     }
 }

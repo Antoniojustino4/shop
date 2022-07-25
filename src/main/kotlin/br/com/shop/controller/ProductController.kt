@@ -25,7 +25,7 @@ class ProductController {
     lateinit var productService: ProductService
 
     @GetMapping
-    fun list(): ResponseEntity<Page<Product>> {
+    fun findAll(): ResponseEntity<Page<Product>> {
         val pageable: Pageable = PageRequest.of(0, 10)
         val products: Page<Product> = productService.findAll(pageable)
         return ResponseEntity(products, HttpStatus.OK)

@@ -22,7 +22,7 @@ class CartController {
     lateinit var cartService: CartService
 
     @GetMapping
-    fun list(): ResponseEntity<Page<CartDto>> {
+    fun findAll(): ResponseEntity<Page<CartDto>> {
         val pageable: Pageable = PageRequest.of(0, 10)
         val carts: Page<Cart> = cartService.findAll(pageable)
         val cartsDto = CartDto.converter(carts)
@@ -30,13 +30,17 @@ class CartController {
     }
 
     @GetMapping(path = ["/{id}"])
-    fun findById(@PathVariable id:Long): ResponseEntity<Cart> {
-        return ResponseEntity(cartService.findById(id), HttpStatus.OK)
+    fun findById(@PathVariable id:Long): ResponseEntity<CartDto> {
+        val cart = cartService.findById(id)
+        val cartDto = CartDto(cart)
+        return ResponseEntity(cartDto, HttpStatus.OK)
     }
 
     @PostMapping
-    fun save(@RequestBody @PathVariable cart: Cart): ResponseEntity<Cart> {
-        return ResponseEntity(cartService.save(cart), HttpStatus.CREATED)
+    fun save(@RequestBody @PathVariable cartDto: CartDto): ResponseEntity<CartDto> {
+        val cart = cartDto.converter()
+        val cartDto = CartDto(cartService.save(cart))
+        return ResponseEntity(cartDto, HttpStatus.CREATED)
     }
 
     @DeleteMapping(path = ["/{id}"])
@@ -45,8 +49,9 @@ class CartController {
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id:Long, @RequestBody cart: Cart): ResponseEntity<Cart> {
-        cart.id = id
-        return ResponseEntity(cartService.save(cart), HttpStatus.NO_CONTENT)
+    fun replace(@PathVariable id:Long, @RequestBody cartDto: CartDto): ResponseEntity<CartDto> {
+        val cart = cartDto.converter(id)
+        val cartDto = CartDto(cartService.save(cart))
+        return ResponseEntity(cartDto, HttpStatus.NO_CONTENT)
     }
 }
