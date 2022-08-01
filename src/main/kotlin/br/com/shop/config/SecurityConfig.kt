@@ -15,16 +15,17 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
     private lateinit var shopUserService: ShopUserService
 
     override fun configure(http: HttpSecurity) {
-        http.csrf().disable()
-            //http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            .authorizeRequests()
-            .antMatchers("/products/**").hasRole("USER")
-            .anyRequest()
-            .authenticated()
-            .and()
-            .formLogin()
-            .and()
-            .httpBasic()
+//        http.csrf().disable()
+//            //http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//            .authorizeRequests()
+//            .antMatchers("/products/**").hasRole("USER")
+//            .anyRequest()
+//            .authenticated()
+//            .and()
+//            .formLogin()
+//            .and()
+//            .httpBasic()
+        http.authorizeRequests().antMatchers("/**").permitAll().and().csrf().disable();
     }
 
     override fun configure(auth: AuthenticationManagerBuilder) {

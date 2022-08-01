@@ -7,8 +7,7 @@ class Cart(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long,
-    @ManyToOne
-    var product: Product,
+    var productId: Long,
     var name: String,
     var quantity: Int,
     var price: Double,

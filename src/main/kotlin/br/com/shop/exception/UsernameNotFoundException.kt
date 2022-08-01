@@ -1,4 +1,4 @@
 package br.com.shop.exception
 
-class UsernameNotFoundException: Exception() {
-}
+//class UsernameNotFoundException: Exception() {
+//}

@@ -4,13 +4,23 @@ import br.com.shop.model.Cart
 import br.com.shop.model.Order
 import org.springframework.data.domain.Page
 import java.time.LocalDate
+import javax.validation.constraints.DecimalMin
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
-class OrderDto(
-    var total: Double,
-    var carts: List<Cart>,
-    var date: LocalDate,
-){
-    constructor(order: Order): this(order.total, order.carts, order.date)
+class OrderDto{
+    @DecimalMin(value = "1", message = "The total field cannot is smaller that one")
+    var total: Double
+    @NotEmpty(message = "The carts field is mandatory")
+    var carts: List<Cart>
+    @NotEmpty(message = "The date field is mandatory")
+    var date: LocalDate
+
+    constructor(order: Order){
+        this.total = order.total
+        this.carts = order.carts
+        this.date = order.date
+    }
 
     fun converter(): Order {
         return Order(0, total, carts, date)
@@ -22,7 +32,7 @@ class OrderDto(
 
     companion object {
         fun converter(orders: Page<Order>): Page<OrderDto> {
-            return orders.map { order -> OrderDto(order.total, order.carts, order.date) }
+            return orders.map { order -> OrderDto(order) }
         }
     }
 

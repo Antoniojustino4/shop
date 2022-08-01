@@ -16,6 +16,9 @@ class ProductService {
     fun findAll(pageable: Pageable): Page<Product> {
         return productRepository.findAll(pageable)
     }
+    fun findAll(nameProduct: String, pageable: Pageable): Page<Product> {
+        return productRepository.findByName(nameProduct, pageable)
+    }
 
     fun findById(id: Long): Product {
         return productRepository.findById(id).get()

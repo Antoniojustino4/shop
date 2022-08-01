@@ -40,8 +40,8 @@ internal class LoadDatabase {
             productRepository.save(product3)
             productRepository.save(product4)
 
-            val cart1 = Cart(0, product1, "a", 1, 12.0)
-            val cart2 = Cart(0, product2, "a", 1, 12.0)
+            val cart1 = Cart(0, product1.id, "a", 1, 12.0)
+            val cart2 = Cart(0, product2.id, "a", 1, 12.0)
 
             cartRepository.save(cart1)
             cartRepository.save(cart2)
