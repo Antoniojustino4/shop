@@ -36,7 +36,7 @@ class OrderController {
     @GetMapping(path = ["/{id}"])
     fun findById(@PathVariable id: Long): ResponseEntity<OrderDto> {
         val order:Optional<Order> = Optional.ofNullable(orderService.findById(id))
-        if (order.isEmpty){
+        if (!order.isEmpty){
             return ResponseEntity(OrderDto(order.get()), HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()

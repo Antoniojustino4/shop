@@ -29,8 +29,14 @@ class ProductController {
     lateinit var productService: ProductService
 
     @GetMapping
-    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<Page<ProductDto>> {
-        var products: Page<Product> = productService.findAll(pageable)
+    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
+                @RequestParam(required = false) name: Optional<String>): ResponseEntity<Page<ProductDto>> {
+        var products = if (name.isEmpty){
+            productService.findAll(pageable)
+        }else{
+            productService.findAll(name.get(), pageable)
+        }
+
         return ResponseEntity(ProductDto.converter(products), HttpStatus.OK)
     }
 
@@ -38,7 +44,7 @@ class ProductController {
     //@PreAuthorize("hasRole('ADMIN')")
     fun findById(@PathVariable id:Long): ResponseEntity<ProductDto> {
         val product: Optional<Product> = Optional.ofNullable(productService.findById(id))
-        if (product.isEmpty){
+        if (!product.isEmpty){
             return ResponseEntity(ProductDto(product.get()), HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()

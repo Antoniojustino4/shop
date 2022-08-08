@@ -35,8 +35,7 @@ class CartController {
     @GetMapping(path = ["/{id}"])
     fun findById(@PathVariable id: Long): ResponseEntity<CartDto> {
         val cart: Optional<Cart> = Optional.ofNullable(cartService.findById(id))
-
-        if (cart.isEmpty){
+        if (!cart.isEmpty){
             return ResponseEntity(CartDto(cart.get()), HttpStatus.OK)
         }
         return  ResponseEntity.notFound().build()
