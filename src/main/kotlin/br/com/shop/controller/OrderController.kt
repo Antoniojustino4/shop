@@ -25,7 +25,7 @@ import javax.validation.Valid
 class OrderController {
 
     @Autowired
-    lateinit var orderService: OrderService
+    private lateinit var orderService: OrderService
 
     @GetMapping
     fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<Page<OrderDto>> {
@@ -35,8 +35,8 @@ class OrderController {
 
     @GetMapping(path = ["/{id}"])
     fun findById(@PathVariable id: Long): ResponseEntity<OrderDto> {
-        val order:Optional<Order> = Optional.ofNullable(orderService.findById(id))
-        if (!order.isEmpty){
+        if(orderService.existsById(id)){
+            val order = orderService.findById(id)
             return ResponseEntity(OrderDto(order.get()), HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()
@@ -52,13 +52,19 @@ class OrderController {
 
     @DeleteMapping(path = ["/{id}"])
     fun delete(@PathVariable id: Long): ResponseEntity<Unit> {
-        return ResponseEntity(orderService.delete(id), HttpStatus.NO_CONTENT)
+        if(orderService.existsById(id)) {
+            return ResponseEntity(orderService.delete(id), HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 
     @PutMapping(path = ["/{id}"])
     fun replace(@PathVariable id: Long, @RequestBody @Valid orderDto: OrderDto): ResponseEntity<OrderDto> {
-        val order = orderDto.converter(id)
-        val newOrderDto = OrderDto(orderService.save(order))
-        return ResponseEntity(newOrderDto, HttpStatus.NO_CONTENT)
+        if(orderService.existsById(id)) {
+            val order = orderDto.converter(id)
+            val newOrderDto = OrderDto(orderService.save(order))
+            return ResponseEntity(newOrderDto, HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 }

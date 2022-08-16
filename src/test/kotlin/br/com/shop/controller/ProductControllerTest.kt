@@ -1,20 +1,22 @@
 package br.com.shop.controller
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import java.net.URI
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class ProductControllerTest(
     @Autowired
     val mockMvc: MockMvc
@@ -25,10 +27,9 @@ class ProductControllerTest(
             "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
     private lateinit var response: MvcResult
 
-    fun getId(){
+    private fun getId(){
         id = getId(response, "products")
     }
-
 
     @AfterEach
     fun `cleaning repository`() {
@@ -37,11 +38,9 @@ class ProductControllerTest(
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent)
-            println("-----------------------------------------------------------")
         }
         id = 0L
     }
-
 
     @Test
     fun `Get isEmpty`() {
@@ -49,25 +48,49 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isArray)
             .andExpect(jsonPath("$.content").isEmpty)
     }
 
+    @Test
+    fun `Get by name`() {
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isCreated).andReturn()
+
+        getId()
+
+        mockMvc.perform(get(url).requestAttr("name", "Pan")
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.totalElements").value("1"))
+            .andReturn()
+    }
 
     @Test
-    fun `Get isNotEmpty`() {
+    fun `Get by id`() {
         response = mockMvc.perform(post(url).content(productJson)
-                .accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isCreated).andReturn()
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isCreated).andReturn()
 
-        mockMvc.perform(get(url)
-                .accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+        getId()
+
+        mockMvc.perform(get("$url/$id")
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isArray)
-            .andExpect(jsonPath("$.content").isNotEmpty)
+            .andExpect(jsonPath("$.name").isNotEmpty)
+            .andExpect(jsonPath("$.name").value("Pan"))
+    }
+
+    @Test
+    fun `Get by id with id non-existent`() {
+        mockMvc.perform(get("$url/2786")
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isNotFound)
     }
 
     @Test
@@ -75,7 +98,6 @@ class ProductControllerTest(
         response = mockMvc.perform(post(url).content(productJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isCreated).andReturn()
 
         getId()
@@ -84,8 +106,98 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isArray)
             .andExpect(jsonPath("$.content").isNotEmpty)
+
+        Assertions.assertNotNull(response.response.redirectedUrl)
+    }
+
+    @Test
+    fun `Post with field name empty`() {
+        val productJson = "{\"name\" : \"\", \"description\" : \"Red\", \"price\" : 1.0," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.fields").value("name"))
+            .andReturn()
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content").isEmpty)
+    }
+
+    @Test
+    fun `Post with field description empty`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"\", \"price\" : 1.0," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.fields").value("description"))
+            .andReturn()
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content").isEmpty)
+    }
+
+    @Test
+    fun `Post with field price empty`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : ," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content").isEmpty)
+    }
+
+    @Test
+    fun `Post with field price negative`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.fields").value("price"))
+            .andReturn()
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content").isEmpty)
+    }
+
+    @Test
+    fun `Post with field imageUrl empty`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
+                "\"imageUrl\" : \"\"}"
+        response = mockMvc.perform(post(url).content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.fields").value("imageUrl"))
+            .andReturn()
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -93,7 +205,6 @@ class ProductControllerTest(
         response = mockMvc.perform(post(url).content(productJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isCreated).andReturn()
 
         getId()
@@ -109,7 +220,21 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isArray)
+            .andExpect(jsonPath("$.content").isEmpty)
+    }
+
+    @Test
+    fun `Delete with id non-existent`() {
+        mockMvc.perform(delete("$url/1")
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isNotFound)
+
+
+        mockMvc.perform(get(url)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.content").isEmpty)
     }
 
@@ -118,7 +243,6 @@ class ProductControllerTest(
         response = mockMvc.perform(post(url).content(productJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isCreated).andReturn()
 
         getId()
@@ -129,7 +253,14 @@ class ProductControllerTest(
         mockMvc.perform(put("$url/$id").content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `Put with id non-existent`() {
+        mockMvc.perform(put("$url/1").content(productJson)
+            .accept(APPLICATION_JSON)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isNotFound)
     }
 }

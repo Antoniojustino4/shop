@@ -26,10 +26,10 @@ import javax.validation.Valid
 class ProductController {
 
     @Autowired
-    lateinit var productService: ProductService
+    private lateinit var productService: ProductService
 
     @GetMapping
-    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
+    fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
                 @RequestParam(required = false) name: Optional<String>): ResponseEntity<Page<ProductDto>> {
         var products = if (name.isEmpty){
             productService.findAll(pageable)
@@ -43,8 +43,8 @@ class ProductController {
     @GetMapping(path = ["/{id}"])
     //@PreAuthorize("hasRole('ADMIN')")
     fun findById(@PathVariable id:Long): ResponseEntity<ProductDto> {
-        val product: Optional<Product> = Optional.ofNullable(productService.findById(id))
-        if (!product.isEmpty){
+        if (productService.existsById(id)) {
+            val product = productService.findById(id)
             return ResponseEntity(ProductDto(product.get()), HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()
@@ -56,6 +56,8 @@ class ProductController {
 //        return ResponseEntity(productService.findById(id), HttpStatus.OK)
 //    }
 
+
+    //PAREI AQUI
     @PostMapping
     fun save(@RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<ProductDto> {
         val productSaved= productService.save(productDto.converter())
@@ -66,13 +68,19 @@ class ProductController {
 
     @DeleteMapping(path = ["/{id}"])
     fun delete(@PathVariable id:Long): ResponseEntity<Unit> {
-        return ResponseEntity(productService.delete(id), HttpStatus.NO_CONTENT)
+        if(productService.existsById(id)) {
+            return ResponseEntity(productService.delete(id), HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 
     @PutMapping(path = ["/{id}"])
     fun replace(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto): ResponseEntity<ProductDto> {
-        val product = productDto.converter(id)
-        val newProductDto = ProductDto(productService.save(product))
-        return ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
+        if(productService.existsById(id)) {
+            val product = productDto.converter(id)
+            val newProductDto = ProductDto(productService.save(product))
+            return ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 }

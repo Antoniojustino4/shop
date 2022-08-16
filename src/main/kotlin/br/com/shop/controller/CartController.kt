@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.util.Optional
 import javax.validation.Valid
 
 
@@ -24,7 +23,7 @@ import javax.validation.Valid
 class CartController {
 
     @Autowired
-    lateinit var cartService: CartService
+    private lateinit var cartService: CartService
 
     @GetMapping
     fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<Page<CartDto>> {
@@ -34,8 +33,8 @@ class CartController {
 
     @GetMapping(path = ["/{id}"])
     fun findById(@PathVariable id: Long): ResponseEntity<CartDto> {
-        val cart: Optional<Cart> = Optional.ofNullable(cartService.findById(id))
-        if (!cart.isEmpty){
+        if (cartService.existsById(id)){
+            val cart = cartService.findById(id)
             return ResponseEntity(CartDto(cart.get()), HttpStatus.OK)
         }
         return  ResponseEntity.notFound().build()
@@ -51,13 +50,19 @@ class CartController {
 
     @DeleteMapping(path = ["/{id}"])
     fun delete(@PathVariable id: Long): ResponseEntity<Unit> {
-        return ResponseEntity(cartService.delete(id), HttpStatus.NO_CONTENT)
+        if (cartService.existsById(id)){
+            return ResponseEntity(cartService.delete(id), HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 
     @PutMapping(path = ["/{id}"])
     fun replace(@PathVariable id: Long, @RequestBody @Valid cartDto: CartDto): ResponseEntity<CartDto> {
-        val cart = cartDto.converter(id)
-        val newCartDto = CartDto(cartService.save(cart))
-        return ResponseEntity(newCartDto, HttpStatus.NO_CONTENT)
+        if (cartService.existsById(id)){
+            val cart = cartDto.converter(id)
+            val newCartDto = CartDto(cartService.save(cart))
+            return ResponseEntity(newCartDto, HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.notFound().build()
     }
 }

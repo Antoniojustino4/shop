@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.Optional
 
 @Service
 class ProductService {
 
     @Autowired
-    lateinit var productRepository: ProductRepository
+    private lateinit var productRepository: ProductRepository
 
     fun findAll(pageable: Pageable): Page<Product> {
         return productRepository.findAll(pageable)
@@ -20,8 +21,8 @@ class ProductService {
         return productRepository.findByName(nameProduct, pageable)
     }
 
-    fun findById(id: Long): Product {
-        return productRepository.findById(id).get()
+    fun findById(id: Long): Optional<Product> {
+        return productRepository.findById(id)
     }
 
     fun save(product: Product): Product {
@@ -30,5 +31,9 @@ class ProductService {
 
     fun delete(id: Long) {
         productRepository.deleteById(id)
+    }
+
+    fun existsById(id: Long): Boolean {
+        return productRepository.existsById(id)
     }
 }

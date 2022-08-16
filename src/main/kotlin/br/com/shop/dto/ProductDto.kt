@@ -10,7 +10,7 @@ class ProductDto{
     var name: String
     @NotBlank(message = "The description field is mandatory")
     var description: String
-    @DecimalMin(value = "1", message = "The price field cannot is smaller that one")
+    @DecimalMin(value = "0.01", message = "The price field cannot is smaller that one")
     var price: Double
     @NotBlank(message = "The imageUrl field is mandatory")
     var imageUrl: String

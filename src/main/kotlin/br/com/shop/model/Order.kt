@@ -12,5 +12,5 @@ class Order(
     var total: Double,
     @OneToMany(cascade = [CascadeType.MERGE])
     var carts: List<Cart>,
-    var date: LocalDate,
+    private var date: LocalDate = LocalDate.now(),
 )

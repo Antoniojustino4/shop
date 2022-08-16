@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
 class CartDto{
-    @DecimalMin(value = "1", message = "The price field is mandatory")
+    @DecimalMin(value = "1", message = "The productId field is mandatory")
     var productId: Long
     @NotBlank(message = "The name field is mandatory")
     var name: String
