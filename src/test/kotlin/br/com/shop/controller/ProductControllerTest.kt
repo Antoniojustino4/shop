@@ -104,7 +104,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isNotEmpty)
 
         Assertions.assertNotNull(response.response.redirectedUrl)
     }
@@ -238,7 +237,7 @@ class ProductControllerTest(
 
         getId()
 
-        var newJson = "{\"name\" : \"new Pan\", \"description\" : \"new Pan Red\", \"price\" : 2.0," +
+        val newJson = "{\"name\" : \"new Pan\", \"description\" : \"new Pan Red\", \"price\" : 2.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
 
         mockMvc.perform(put("$url/$id").content(newJson)

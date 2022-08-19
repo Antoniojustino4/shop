@@ -87,7 +87,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -127,7 +126,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isNotEmpty)
 
         Assertions.assertNotNull(response.response.redirectedUrl)
     }
@@ -145,7 +143,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -162,7 +159,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -179,7 +175,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -203,7 +198,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -218,7 +212,6 @@ class OrderControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test

@@ -22,8 +22,6 @@ class ProductService {
     }
 
     fun findById(id: Long): Optional<Product> {
-        val product = productRepository.findById(id)
-        println(product.get())
         return productRepository.findById(id)
     }
 
