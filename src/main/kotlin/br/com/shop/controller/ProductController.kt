@@ -5,7 +5,6 @@ import br.com.shop.model.Product
 import br.com.shop.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -31,7 +30,7 @@ class ProductController {
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
                 @RequestParam(required = false) name: Optional<String>): ResponseEntity<Page<ProductDto>> {
-        var products = if (name.isEmpty){
+        val products = if (name.isEmpty){
             productService.findAll(pageable)
         }else{
             productService.findAll(name.get(), pageable)
@@ -57,7 +56,6 @@ class ProductController {
 //    }
 
 
-    //PAREI AQUI
     @PostMapping
     fun save(@RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<ProductDto> {
         val productSaved= productService.save(productDto.converter())

@@ -16,7 +16,7 @@ class RestExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleException(exception: MethodArgumentNotValidException): ResponseEntity<ValidationExceptionDetails> {
-        var ex = ValidationExceptionDetails()
+        val ex = ValidationExceptionDetails()
 
         val fieldErrors = exception.bindingResult.fieldErrors
         val fields: String = fieldErrors.stream().map { obj: FieldError -> obj.field }.collect(Collectors.joining(", "))
@@ -25,7 +25,7 @@ class RestExceptionHandler {
 
         ex.fields = fields
         ex.fieldsMessage = fieldsMessage
-        ex.title = "Bad Resquest Exception, Invalid Fields"
+        ex.title = "Bad Request Exception, Invalid Fields"
         ex.status = HttpStatus.BAD_REQUEST.value()
         ex.details = exception.message
         ex.developerMessage = exception.javaClass.name
@@ -35,9 +35,9 @@ class RestExceptionHandler {
 
     @Override
     fun handleException(exception: Exception): ResponseEntity<ExceptionDetails> {
-        var ex = ExceptionDetails()
+        val ex = ExceptionDetails()
 
-        ex.title = "Bad Resquest Exception, Invalid Fields"
+        ex.title = "Bad Request Exception, Invalid Fields"
         ex.status = HttpStatus.BAD_REQUEST.value()
         ex.details = exception.message
         ex.developerMessage = exception.javaClass.name

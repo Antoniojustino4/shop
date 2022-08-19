@@ -10,7 +10,9 @@ class Order(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long,
     var total: Double,
-    @OneToMany(cascade = [CascadeType.MERGE])
-    var carts: List<Cart>,
-    private var date: LocalDate = LocalDate.now(),
-)
+    @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
+    var carts: List<Cart>
+){
+    private var date: LocalDate = LocalDate.now()
+
+}

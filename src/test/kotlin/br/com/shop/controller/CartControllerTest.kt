@@ -23,16 +23,20 @@ class CartControllerTest(
     private var id :Long = 0
     private var idProduct :Long = 0
     private val url = URI("/carts")
-    private val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
-            "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
     private lateinit var response: MvcResult
+    private var cont = 0
 
     private fun getId(){
         id = getId(response, "carts")
     }
 
     private fun getJson(): String {
-        return "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : 1, \"price\" : 49.00}"
+        return "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : 1, \"price\" : 49.00}"
+    }
+
+    private fun getJsonProduct(): String{
+        return "{\"id\": \"$idProduct\" ,\"name\" : \"Pan Cart\", \"description\" : \"Red\", \"price\" : 1.0," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
     }
 
     @AfterEach
@@ -48,12 +52,21 @@ class CartControllerTest(
 
     @BeforeEach
     fun `add product in repository`() {
+        cont++
         if (idProduct == 0L){
+            val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
+                    "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
             val response = mockMvc.perform(post("/products").content(productJson)
                 .accept(APPLICATION_JSON)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated).andReturn()
             idProduct = getId(response, "products")
+        }
+        if (cont==14){
+            mockMvc.perform(delete("/products/$idProduct")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isNoContent)
         }
     }
 
@@ -111,29 +124,11 @@ class CartControllerTest(
 
     @Test
     fun `Post with field productId empty`() {
-        val newJson = "{\"productId\" : \"\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : 98.00}"
+        val newJson = "{\"product\" : \"\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : 98.00}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.fields").value("productId"))
-            .andReturn()
-
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
-    }
-
-    @Test
-    fun `Post with field productId non-existent`() {
-        val newJson = "{\"productId\" : \"7985\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : 98.00}"
-        response = mockMvc.perform(post(url).content(newJson)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.fields").value("productId"))
             .andReturn()
 
         mockMvc.perform(get(url)
@@ -145,7 +140,7 @@ class CartControllerTest(
 
     @Test
     fun `Post with field name empty`() {
-        val newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"\", \"quantity\" : 2, \"price\" : 98.00}"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"\", \"quantity\" : 2, \"price\" : 98.00}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -162,7 +157,7 @@ class CartControllerTest(
 
     @Test
     fun `Post with field quantity empty`() {
-        val newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : , \"price\" : 98.00}"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : , \"price\" : 98.00}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -178,7 +173,7 @@ class CartControllerTest(
 
     @Test
     fun `Post with field quantity negative`() {
-        val newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : -2, \"price\" : 98.00}"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : -2, \"price\" : 98.00}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -195,7 +190,7 @@ class CartControllerTest(
 
     @Test
     fun `Post with field price empty`() {
-        val newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\": }"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : 2, \"price\": }"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -211,7 +206,7 @@ class CartControllerTest(
 
     @Test
     fun `Post with field price negative`() {
-        val newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : -98.00}"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : -98.00}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -273,7 +268,7 @@ class CartControllerTest(
 
         getId()
 
-        var newJson = "{\"productId\" : \"$idProduct\", \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : 98.00}"
+        val newJson = "{\"product\" : ${getJsonProduct()}, \"name\" : \"Pan\", \"quantity\" : 2, \"price\" : 98.00}"
 
         mockMvc.perform(put("$url/$id").content(newJson)
             .accept(APPLICATION_JSON)

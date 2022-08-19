@@ -6,13 +6,13 @@ import org.springframework.data.domain.Page
 import javax.validation.constraints.DecimalMin
 import javax.validation.constraints.NotEmpty
 
-class OrderDto{
+class OrderDto(order: Order) {
     @DecimalMin(value = "1", message = "The total field cannot is smaller that one")
     var total: Double
     @NotEmpty(message = "The carts field is mandatory")
     var carts: List<Cart>
 
-    constructor(order: Order){
+    init {
         this.total = order.total
         this.carts = order.carts
     }

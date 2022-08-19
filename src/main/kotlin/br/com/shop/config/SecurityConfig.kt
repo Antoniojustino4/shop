@@ -25,7 +25,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
 //            .formLogin()
 //            .and()
 //            .httpBasic()
-        http.authorizeRequests().antMatchers("/**").permitAll().and().csrf().disable();
+        http.authorizeRequests().antMatchers("/**").permitAll().and().csrf().disable()
     }
 
     override fun configure(auth: AuthenticationManagerBuilder) {

@@ -2,7 +2,7 @@ package br.com.shop.repository
 
 import br.com.shop.model.Cart
 import org.springframework.data.repository.PagingAndSortingRepository
-import org.springframework.stereotype.Repository
+import org.springframework.data.rest.core.annotation.RepositoryRestResource
 
-@Repository
+@RepositoryRestResource(collectionResourceRel = "carts", path = "carts")
 interface CartRepository: PagingAndSortingRepository<Cart, Long>

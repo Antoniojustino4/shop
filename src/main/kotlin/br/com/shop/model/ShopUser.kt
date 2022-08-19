@@ -3,7 +3,6 @@ package br.com.shop.model
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
-import java.util.*
 import java.util.stream.Collectors
 import javax.persistence.*
 
@@ -23,7 +22,7 @@ class ShopUser(
 ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        var authorities = authorities.subSequence(0, authorities.length)
+        val authorities = authorities.subSequence(0, authorities.length)
             .split(",")
         return authorities.stream().map { s -> SimpleGrantedAuthority(s) }
             .collect(Collectors.toList())

@@ -48,7 +48,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -64,7 +63,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.totalElements").value("1"))
             .andReturn()
     }
 
@@ -126,7 +124,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -144,7 +141,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -161,7 +157,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -179,7 +174,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -197,7 +191,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -220,12 +213,11 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
     fun `Delete with id non-existent`() {
-        mockMvc.perform(delete("$url/1")
+        mockMvc.perform(delete("$url/796842")
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isNotFound)
@@ -235,7 +227,6 @@ class ProductControllerTest(
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isEmpty)
     }
 
     @Test
@@ -258,7 +249,7 @@ class ProductControllerTest(
 
     @Test
     fun `Put with id non-existent`() {
-        mockMvc.perform(put("$url/1").content(productJson)
+        mockMvc.perform(put("$url/87654").content(productJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isNotFound)

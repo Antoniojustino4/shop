@@ -24,13 +24,20 @@ class OrderControllerTest(
     private val url = URI("/orders")
     private var cartId: Long = 0
     private lateinit var response: MvcResult
+    private var cont = 0
+    private var productId: Long = 0
 
     private fun getJson(): String{
         return "{\"total\": 150.0, \"carts\": [ ${getJsonCarts()} ]}"
     }
 
     private fun getJsonCarts(): String{
-        return "{\"id\": $cartId, \"productId\": 1, \"name\": \"Pan\", \"quantity\": 1, \"price\": 49.00}"
+        return "{\"id\": $cartId, \"product\": ${getJsonProduct()}, \"name\": \"Pan\", \"quantity\": 1, \"price\": 49.00}"
+    }
+
+    private fun getJsonProduct(): String{
+        return "{\"id\" : \"$productId\", \"name\" : \"Pan Order\", \"description\" : \"Red\", \"price\" : 1.0," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
     }
 
     private fun getId(){
@@ -50,14 +57,28 @@ class OrderControllerTest(
 
     @BeforeEach
     fun `add product in repository`() {
+        cont++
         if (cartId == 0L){
-            val cartJson = "{\"productId\": 1, \"name\": \"Pan\", \"quantity\": 1, \"price\": 49.00}"
-            val response = mockMvc.perform(post("/carts").content(cartJson)
+            val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
+                    "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+            val response = mockMvc.perform(post("/products").content(productJson)
                 .accept(APPLICATION_JSON)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated).andReturn()
-            cartId = getId(response, "carts")
+            productId = getId(response, "products")
         }
+        if (cont == 11){
+            mockMvc.perform(delete("/carts/$cartId")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound)
+            println("-------------------------------------------------------------- order")
+            mockMvc.perform(delete("/products/$productId")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound)
+        }
+
     }
 
     @Test
@@ -210,7 +231,7 @@ class OrderControllerTest(
 
         getId()
 
-        var newJson =  "{\"total\": 150.0, \"carts\": [ ${getJsonCarts()} ]}"
+        val newJson =  "{\"total\": 150.0, \"carts\": [ ${getJsonCarts()} ]}"
 
         mockMvc.perform(put("$url/$id").content(newJson)
             .accept(APPLICATION_JSON)

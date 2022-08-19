@@ -1,7 +1,9 @@
 package br.com.shop.service
 
 import br.com.shop.model.Cart
+import br.com.shop.model.Product
 import br.com.shop.repository.CartRepository
+import br.com.shop.repository.ProductRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -13,6 +15,8 @@ class CartService {
 
     @Autowired
     private lateinit var cartRepository: CartRepository
+    @Autowired
+    private lateinit var productRepository: ProductRepository
 
     fun findAll(pageable: Pageable): Page<Cart> {
         return cartRepository.findAll(pageable)
@@ -32,5 +36,13 @@ class CartService {
 
     fun existsById(id: Long): Boolean {
         return cartRepository.existsById(id)
+    }
+
+    fun findByIdProduct(id: Long): Optional<Product>{
+        return productRepository.findById(id)
+    }
+
+    fun existsByIdProduct(id: Long): Boolean {
+        return productRepository.existsById(id)
     }
 }

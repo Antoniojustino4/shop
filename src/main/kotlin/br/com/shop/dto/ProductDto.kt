@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page
 import javax.validation.constraints.DecimalMin
 import javax.validation.constraints.NotBlank
 
-class ProductDto{
+class ProductDto(product: Product) {
     @NotBlank(message = "The name field is mandatory")
     var name: String
     @NotBlank(message = "The description field is mandatory")
@@ -17,7 +17,7 @@ class ProductDto{
     var isFavorite: Boolean= false
 
 
-    constructor(product: Product){
+    init {
         this.name = product.name
         this.description = product.description
         this.price = product.price
