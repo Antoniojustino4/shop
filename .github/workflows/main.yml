@@ -13,6 +13,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres        
+          POSTGRES_PASSWORD: kamisama123
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
 
     steps:
       - uses: actions/checkout@v3
