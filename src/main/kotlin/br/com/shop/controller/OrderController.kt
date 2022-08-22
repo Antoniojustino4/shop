@@ -27,33 +27,26 @@ class OrderController {
     @Autowired
     private lateinit var orderService: OrderService
 
-    @Autowired
-    private lateinit var orderModelAssembler: OrderModelAssembler
-
     @GetMapping
-    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<CollectionModel<EntityModel<Order>>> {
+    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<Page<Order>> {
         val orders: Page<Order> = orderService.findAll(pageable)
-
-        val entityModels = orderModelAssembler.toCollectionModel(orders)
-        return ResponseEntity(entityModels, HttpStatus.OK)
+        return ResponseEntity(orders, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
-    fun findById(@PathVariable id: Long): ResponseEntity<EntityModel<Order>> {
+    fun findById(@PathVariable id: Long): ResponseEntity<Order> {
         if(orderService.existsById(id)){
-            val order = orderService.findById(id)
-            val entityModel = orderModelAssembler.toModel(order.get())
-            return ResponseEntity(entityModel, HttpStatus.OK)
+            val order = orderService.findById(id).get()
+            return ResponseEntity(order, HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun save(@RequestBody @Valid orderDto: OrderDto, uriBuilder: UriComponentsBuilder): ResponseEntity<EntityModel<Order>> {
+    fun save(@RequestBody @Valid orderDto: OrderDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Order> {
         val orderSaved = orderService.save(orderDto.converter())
-        val newOrderDto = orderModelAssembler.toModel(orderSaved)
         val uri: URI = uriBuilder.path("/orders/{id}").buildAndExpand(orderSaved.id).toUri()
-        return ResponseEntity.created(uri).body(newOrderDto)
+        return ResponseEntity.created(uri).body(orderSaved)
     }
 
     @DeleteMapping(path = ["/{id}"])
@@ -65,11 +58,10 @@ class OrderController {
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id: Long, @RequestBody @Valid orderDto: OrderDto): ResponseEntity<EntityModel<Order>> {
+    fun replace(@PathVariable id: Long, @RequestBody @Valid orderDto: OrderDto): ResponseEntity<Order> {
         if(orderService.existsById(id)) {
             val order = orderDto.converter(id)
-            orderService.save(order)
-            val newOrderDto = orderModelAssembler.toModel(order)
+            val newOrderDto =  orderService.save(order)
             return ResponseEntity(newOrderDto, HttpStatus.NO_CONTENT)
         }
         return ResponseEntity.notFound().build()

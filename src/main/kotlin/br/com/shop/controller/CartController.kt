@@ -5,6 +5,7 @@ import br.com.shop.dto.modelAssembler.CartModelAssembler
 import br.com.shop.model.Cart
 import br.com.shop.service.CartService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -27,33 +28,26 @@ class CartController {
     @Autowired
     private lateinit var cartService: CartService
 
-    @Autowired
-    private lateinit var cartModelAssembler: CartModelAssembler
-
     @GetMapping
-    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<CollectionModel<EntityModel<Cart>>> {
+    fun findAll(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable): ResponseEntity<Page<Cart>> {
         val carts = cartService.findAll(pageable)
-
-        val entityModels = cartModelAssembler.toCollectionModel(carts)
-        return ResponseEntity(entityModels, HttpStatus.OK)
+        return ResponseEntity(carts, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
-    fun findById(@PathVariable id: Long): ResponseEntity<EntityModel<Cart>> {
+    fun findById(@PathVariable id: Long): ResponseEntity<Cart> {
         if (cartService.existsById(id)){
-            val cart = cartService.findById(id)
-            val entityModel = cartModelAssembler.toModel(cart.get())
-            return ResponseEntity(entityModel, HttpStatus.OK)
+            val cart = cartService.findById(id).get()
+            return ResponseEntity(cart, HttpStatus.OK)
         }
         return  ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun save(@RequestBody @Valid cartDto: CartDto, uriBuilder: UriComponentsBuilder): ResponseEntity<EntityModel<Cart>> {
+    fun save(@RequestBody @Valid cartDto: CartDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Cart> {
         val cartSaved = cartService.save(cartDto.converter())
-        val newCartDto = cartModelAssembler.toModel(cartSaved)
         val uri: URI = uriBuilder.path("/carts/{id}").buildAndExpand(cartSaved.id).toUri()
-        return ResponseEntity.created(uri).body(newCartDto)
+        return ResponseEntity.created(uri).body(cartSaved)
     }
 
     @DeleteMapping(path = ["/{id}"])
@@ -65,11 +59,10 @@ class CartController {
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id: Long, @RequestBody @Valid cartDto: CartDto): ResponseEntity<EntityModel<Cart>> {
+    fun replace(@PathVariable id: Long, @RequestBody @Valid cartDto: CartDto): ResponseEntity<Cart> {
         if (cartService.existsById(id)){
             val cart = cartDto.converter(id)
-            cartService.save(cart)
-            val newCartDto = cartModelAssembler.toModel(cart)
+            val newCartDto = cartService.save(cart)
             return ResponseEntity(newCartDto, HttpStatus.NO_CONTENT)
         }
         return ResponseEntity.notFound().build()

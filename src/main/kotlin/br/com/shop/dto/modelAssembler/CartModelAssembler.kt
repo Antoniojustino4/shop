@@ -1,6 +1,7 @@
 package br.com.shop.dto.modelAssembler
 
 import br.com.shop.controller.CartController
+import br.com.shop.controller.OrderController
 import br.com.shop.model.Cart
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
@@ -15,7 +16,9 @@ class CartModelAssembler: RepresentationModelAssembler<Cart, EntityModel<Cart>> 
     override fun toModel(cart: Cart): EntityModel<Cart> {
         val cartEntityModel = EntityModel.of(cart)
         val selfLink: Link = linkTo(methodOn(CartController::class.java).findById(cart.id)).withSelfRel()
+        val productLink: Link = linkTo(methodOn(CartController::class.java).findById(cart.id)).withRel("product")
 
+        cartEntityModel.add(productLink)
         cartEntityModel.add(selfLink)
         return cartEntityModel
     }

@@ -1,0 +1,50 @@
+version: "3"
+services:
+  db:
+    container_name: postgres
+    image: postgres
+    networks:
+      - database
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=kamisama123
+      - POSTGRES_DB=postgres
+    volumes:
+      - prod_postgresql:/var/lib/postgresql
+      - prod_postgresql_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+
+  app:
+    container_name: server
+    image: springio/gs-spring-boot-docker
+    build:
+      context: .
+      args:
+        - JAR_FILE=target/*.jar
+    networks:
+      - database
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWD=kamisama123
+      - DATABASE_UPDATE=create
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+
+networks:
+  database:
+
+volumes:
+  prod_postgresql:
+  prod_postgresql_data:

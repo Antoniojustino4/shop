@@ -15,7 +15,9 @@ class OrderModelAssembler: RepresentationModelAssembler<Order, EntityModel<Order
     override fun toModel(order: Order): EntityModel<Order> {
         val orderEntityModel = EntityModel.of(order)
         val selfLink: Link = linkTo(methodOn(OrderController::class.java).findById(order.id)).withSelfRel()
+        val cartLink: Link = linkTo(methodOn(OrderController::class.java).findById(order.id)).withRel("cart")
 
+        orderEntityModel.add(cartLink)
         orderEntityModel.add(selfLink)
         return orderEntityModel
     }

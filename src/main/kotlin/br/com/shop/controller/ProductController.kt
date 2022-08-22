@@ -5,11 +5,14 @@ import br.com.shop.dto.modelAssembler.ProductModelAssembler
 import br.com.shop.model.Product
 import br.com.shop.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.server.ExposesResourceFor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,28 +32,24 @@ class ProductController {
     @Autowired
     private lateinit var productService: ProductService
 
-    @Autowired
-    private lateinit var productModelAssembler: ProductModelAssembler
-
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
-                @RequestParam(required = false) name: Optional<String>): ResponseEntity<CollectionModel<EntityModel<Product>>> {
+                @RequestParam(required = false) name: Optional<String>, a: PagedResourcesAssembler<Product>): ResponseEntity<Page<Product>> {
         val products = if (name.isEmpty){
             productService.findAll(pageable)
         }else{
             productService.findAll(name.get(), pageable)
         }
-        val entityModels = productModelAssembler.toCollectionModel(products)
-        return ResponseEntity(entityModels, HttpStatus.OK)
+
+        return ResponseEntity(products, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
     //@PreAuthorize("hasRole('ADMIN')")
-    fun findById(@PathVariable id:Long): ResponseEntity<EntityModel<Product>> {
+    fun findById(@PathVariable id:Long): ResponseEntity<Product> {
         if (productService.existsById(id)) {
-            val product = productService.findById(id)
-            val entityModel = productModelAssembler.toModel(product.get())
-            return ResponseEntity(entityModel, HttpStatus.OK)
+            val product = productService.findById(id).get()
+            return ResponseEntity(product, HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()
     }
@@ -63,11 +62,10 @@ class ProductController {
 
 
     @PostMapping
-    fun save(@RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<EntityModel<Product>> {
+    fun save(@RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Product> {
         val productSaved= productService.save(productDto.converter())
-        val newProductDto = productModelAssembler.toModel(productSaved)
         val uri: URI = uriBuilder.path("/products/{id}").buildAndExpand(productSaved.id).toUri()
-        return ResponseEntity.created(uri).body(newProductDto)
+        return ResponseEntity.created(uri).body(productSaved)
     }
 
     @DeleteMapping(path = ["/{id}"])
@@ -79,11 +77,10 @@ class ProductController {
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto): ResponseEntity<EntityModel<Product>> {
+    fun replace(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto): ResponseEntity<Product> {
         if(productService.existsById(id)) {
             val product = productDto.converter(id)
-            productService.save(product)
-            val newProductDto = productModelAssembler.toModel(product)
+            val newProductDto = productService.save(product)
             return ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
         }
         return ResponseEntity.notFound().build()
