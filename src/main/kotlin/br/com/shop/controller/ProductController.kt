@@ -1,7 +1,7 @@
 package br.com.shop.controller
 
 import br.com.shop.dto.ProductDto
-import br.com.shop.dto.modelAssembler.ProductModelAssembler
+import br.com.shop.logger.Logger
 import br.com.shop.model.Product
 import br.com.shop.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,9 +10,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.CollectionModel
-import org.springframework.hateoas.EntityModel
-import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.server.ExposesResourceFor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,7 +17,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.util.Optional
+import java.util.*
 import javax.validation.Valid
 
 @RestController
@@ -35,18 +32,14 @@ class ProductController {
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
                 @RequestParam(required = false) name: Optional<String>, a: PagedResourcesAssembler<Product>): ResponseEntity<Page<Product>> {
-        val products = if (name.isEmpty){
-            productService.findAll(pageable)
-        }else{
-            productService.findAll(name.get(), pageable)
-        }
-
+        val products = productService.findAll(name, pageable)
         return ResponseEntity(products, HttpStatus.OK)
     }
 
     @GetMapping(path = ["/{id}"])
     //@PreAuthorize("hasRole('ADMIN')")
     fun findById(@PathVariable id:Long): ResponseEntity<Product> {
+        Logger().info("aqui")
         if (productService.existsById(id)) {
             val product = productService.findById(id).get()
             return ResponseEntity(product, HttpStatus.OK)

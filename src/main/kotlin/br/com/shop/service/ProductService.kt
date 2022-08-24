@@ -14,11 +14,13 @@ class ProductService {
     @Autowired
     private lateinit var productRepository: ProductRepository
 
-    fun findAll(pageable: Pageable): Page<Product> {
-        return productRepository.findAll(pageable)
-    }
-    fun findAll(nameProduct: String, pageable: Pageable): Page<Product> {
-        return productRepository.findByName(nameProduct, pageable)
+    fun findAll(name: Optional<String>, pageable: Pageable): Page<Product> {
+        val products = if (name.isEmpty){
+            productRepository.findAll(pageable)
+        }else{
+            productRepository.findByName(name.get(), pageable)
+        }
+        return products
     }
 
     fun findById(id: Long): Optional<Product> {
