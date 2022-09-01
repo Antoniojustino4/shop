@@ -47,6 +47,15 @@ class ProductController {
         return ResponseEntity.notFound().build()
     }
 
+    @PatchMapping(path = ["/{id}/toggleFavorite"])
+    fun toggleFavorite(@PathVariable id:Long): ResponseEntity<Unit>{
+        if (productService.existsById(id)) {
+            productService.toggleFavorite(id)
+            return ResponseEntity.ok().build()
+        }
+        return ResponseEntity.notFound().build()
+    }
+
 //    @GetMapping(path = ["by-id/{id}"])
 //    fun findByIdAuthenticationPrincipal(@PathVariable id:Long, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<Product> {
 //        println(userDetails)

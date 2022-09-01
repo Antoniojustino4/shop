@@ -23,6 +23,11 @@ class ProductService {
         return products
     }
 
+    fun toggleFavorite(id: Long){
+        val product = findById(id).get()
+        productRepository.toggleFavorite(!product.isFavorite, id)
+    }
+
     fun findById(id: Long): Optional<Product> {
         return productRepository.findById(id)
     }

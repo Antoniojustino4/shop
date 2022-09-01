@@ -54,6 +54,16 @@ class ProductRepositoryTest(
     }
 
     @Test
+    fun `ToggleFavorite`(){
+        val productSaved = repository.save(product)
+
+        repository.toggleFavorite(!productSaved.isFavorite, productSaved.id)
+        val productOther = repository.findById(productSaved.id).get()
+
+        Assertions.assertEquals(productSaved.isFavorite, productOther.isFavorite)
+    }
+
+    @Test
     fun `Delete`(){
         val productSaved = repository.save(product)
 
