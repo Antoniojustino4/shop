@@ -7,6 +7,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -21,7 +22,9 @@ class Logger {
     }
 
     private fun logs(text: String){
-        val file = File("src/main/resources/logs/file.txt")
+        val date = LocalDate.now()
+
+        val file = File("src/main/resources/logs/${date}.txt")
         if (!file.exists()) {
             file.createNewFile()
         }

@@ -247,21 +247,6 @@ class ProductControllerTest(
     }
 
     @Test
-    fun `Toggle Favorite`() {
-        response = mockMvc.perform(post(url).content(productJson)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isCreated).andReturn()
-
-        getId()
-
-        mockMvc.perform(patch("$url/$id/toggleFavorite")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-    }
-
-    @Test
     fun `Put with id non-existent`() {
         mockMvc.perform(put("$url/87654").content(productJson)
             .accept(APPLICATION_JSON)

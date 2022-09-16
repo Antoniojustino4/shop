@@ -8,8 +8,8 @@ class Cart(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long,
     @ManyToOne(cascade = [CascadeType.REFRESH])
-    var product: Product,
-    var name: String,
-    var quantity: Int,
-    var price: Double,
+    val product: Product,
+    val quantity: Int,
+    val name: String = product.name,
+    val price: Double = product.price
 )

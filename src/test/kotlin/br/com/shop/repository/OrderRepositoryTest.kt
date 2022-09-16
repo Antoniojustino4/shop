@@ -14,7 +14,7 @@ class OrderRepositoryTest(
     @Autowired
     val repository: OrderRepository
 ) {
-    private val order = Order(0, 15.0, listOf())
+    private val order = Order(0, mutableListOf())
 
     @AfterEach
     fun `cleaning repository`() {
@@ -41,12 +41,10 @@ class OrderRepositoryTest(
     fun `Put`(){
         var orderSaved = repository.save(order)
 
-        orderSaved.total = 20.0
         orderSaved = repository.save(order)
 
         Assertions.assertNotNull(orderSaved)
         Assertions.assertNotNull(orderSaved.id)
-        Assertions.assertEquals(20.0, orderSaved.total)
     }
 
     @Test

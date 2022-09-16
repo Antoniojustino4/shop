@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import java.net.URI
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @SpringBootTest
@@ -28,7 +27,7 @@ class OrderControllerTest(
     private var productId: Long = 0
 
     private fun getJson(): String{
-        return "{\"total\": 150.0, \"carts\": [ ${getJsonCarts()} ]}"
+        return "{\"carts\": [ ${getJsonCarts()} ]}"
     }
 
     private fun getJsonCarts(): String{
@@ -42,17 +41,6 @@ class OrderControllerTest(
 
     private fun getId(){
         id = getId(response, "orders")
-    }
-
-    @AfterEach
-    fun `cleaning repository`() {
-        if (id != 0L) {
-            mockMvc.perform(delete("$url/$id")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON))
-                .andExpect(status().isNoContent)
-        }
-        id = 0L
     }
 
     @BeforeEach
@@ -72,7 +60,6 @@ class OrderControllerTest(
                 .accept(APPLICATION_JSON)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound)
-            println("-------------------------------------------------------------- order")
             mockMvc.perform(delete("/products/$productId")
                 .accept(APPLICATION_JSON)
                 .contentType(APPLICATION_JSON))
@@ -131,23 +118,8 @@ class OrderControllerTest(
     }
 
     @Test
-    fun `Post with field total empty`() {
-        val newJson = "{\"total\": , \"carts\": [ ${getJsonCarts()} ]}"
-        response = mockMvc.perform(post(url).content(newJson)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isBadRequest)
-            .andReturn()
-
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-    }
-
-    @Test
     fun `Post with field carts empty`() {
-        val newJson = "{\"total\": 150.0, \"carts\": []}"
+        val newJson = "{\"carts\": []}"
         response = mockMvc.perform(post(url).content(newJson)
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
@@ -161,83 +133,4 @@ class OrderControllerTest(
             .andExpect(status().isOk)
     }
 
-    @Test
-    fun `Post with field total negative`() {
-        val newJson = "{\"total\": -150.0, \"carts\": [ ${getJsonCarts()} ]}"
-        response = mockMvc.perform(post(url).content(newJson)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.fields").value("total"))
-            .andReturn()
-
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-    }
-
-    @Test
-    fun `Delete`() {
-        response = mockMvc.perform(post(url).content(getJson())
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isCreated).andReturn()
-
-        getId()
-
-        mockMvc.perform(delete("$url/$id")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON)
-        )
-
-        id = 0L
-
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-    }
-
-    @Test
-    fun `Delete with id non-existent`() {
-        mockMvc.perform(delete("$url/1")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isNotFound)
-
-
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-    }
-
-    @Test
-    fun `Put`() {
-        response = mockMvc.perform(post(url).content(getJson())
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isCreated).andReturn()
-
-        getId()
-
-        val newJson =  "{\"total\": 150.0, \"carts\": [ ${getJsonCarts()} ]}"
-
-        mockMvc.perform(put("$url/$id").content(newJson)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isNoContent)
-    }
-
-    @Test
-    fun `Put with id non-existent`() {
-        mockMvc.perform(put("$url/1").content(getJson())
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isNotFound)
-    }
 }

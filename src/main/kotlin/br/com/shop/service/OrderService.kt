@@ -26,10 +26,6 @@ class OrderService {
         return orderRepository.save(order)
     }
 
-    fun delete(id: Long) {
-        orderRepository.deleteById(id)
-    }
-
     fun existsById(id: Long): Boolean {
         return orderRepository.existsById(id)
     }

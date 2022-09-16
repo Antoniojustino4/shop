@@ -12,9 +12,13 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("test")
 class ProductRepositoryTest(
     @Autowired
-    val repository: ProductRepository
+    val repository: ProductRepository,
+    @Autowired
+    val storeRepository: StoreRepository
 ) {
-    private val product = Product(0, "Pan", "Red pan", 49.99, "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg")
+
+    val product = Product(0, "Pan", "Red pan", 49.99,
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg",)
 
     @AfterEach
     fun `cleaning repository`() {
@@ -51,16 +55,6 @@ class ProductRepositoryTest(
         Assertions.assertEquals("Blue Hat", productSaved.description)
         Assertions.assertEquals("Hat", productSaved.name)
         Assertions.assertEquals(25.99, productSaved.price)
-    }
-
-    @Test
-    fun `ToggleFavorite`(){
-        val productSaved = repository.save(product)
-
-        repository.toggleFavorite(!productSaved.isFavorite, productSaved.id)
-        val productOther = repository.findById(productSaved.id).get()
-
-        Assertions.assertEquals(productSaved.isFavorite, productOther.isFavorite)
     }
 
     @Test

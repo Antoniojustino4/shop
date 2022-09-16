@@ -11,10 +11,4 @@ class Product(
     var description: String,
     var price: Double,
     var imageUrl: String,
-    var isFavorite: Boolean= false,
-) {
-
-    fun toggleFavorite(){
-        isFavorite = !isFavorite
-    }
-}
+)

@@ -1,4 +1,4 @@
-package br.com.shop.dto.modelAssembler
+package br.com.shop.controller.dto.modelAssembler
 
 import br.com.shop.controller.OrderController
 import br.com.shop.model.Order

@@ -1,4 +1,4 @@
-package br.com.shop.dto
+package br.com.shop.controller.dto
 
 import br.com.shop.model.Product
 import org.springframework.data.domain.Page
@@ -14,27 +14,24 @@ class ProductDto(product: Product) {
     var price: Double
     @NotBlank(message = "The imageUrl field is mandatory")
     var imageUrl: String
-    var isFavorite: Boolean= false
-
 
     init {
         this.name = product.name
         this.description = product.description
         this.price = product.price
         this.imageUrl = product.imageUrl
-        this.isFavorite = product.isFavorite
     }
 
-    fun converter(): Product {
-        return Product(0, name, description, price, imageUrl, isFavorite)
+    fun convert(): Product {
+        return Product(0, name, description, price, imageUrl)
     }
 
-    fun converter(id: Long): Product {
-        return Product(id, name, description, price, imageUrl, isFavorite)
+    fun convert(id: Long): Product {
+        return Product(id, name, description, price, imageUrl)
     }
 
     companion object {
-        fun converter(products: Page<Product>): Page<ProductDto> {
+        fun convert(products: Page<Product>): Page<ProductDto> {
             return products.map { product -> ProductDto(product) }
         }
     }
