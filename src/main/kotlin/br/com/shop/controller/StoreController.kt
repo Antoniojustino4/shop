@@ -5,8 +5,10 @@ import br.com.shop.controller.dto.ProductDto
 import br.com.shop.controller.dto.StoreDto
 import br.com.shop.exception.IdNoExistException
 import br.com.shop.model.Product
+import br.com.shop.model.enums.OrderStatus
 import br.com.shop.model.store.Store
 import br.com.shop.model.enums.ProductStatus
+import br.com.shop.service.OrderService
 import br.com.shop.service.ProductService
 import br.com.shop.service.StoreService
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,9 +32,10 @@ class StoreController {
 
     @Autowired
     private lateinit var storeService: StoreService
-
     @Autowired
     private lateinit var productService: ProductService
+    @Autowired
+    private lateinit var orderService: OrderService
 
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
@@ -69,10 +72,15 @@ class StoreController {
     }
 
     @GetMapping(path = ["/{id}/products"])
-    fun findAllProductsByStoreId(
-        @PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
-        @PathVariable id:Long): ResponseEntity<Page<List<Product>>> {
+    fun findAllProductsByStoreId(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC,
+        page = 0, size = 10) pageable: Pageable, @PathVariable id:Long): ResponseEntity<Page<List<Product>>> {
         val store = storeService.findAllProductsByStoreId(id, pageable)
+        return ResponseEntity(store, HttpStatus.OK)
+    }
+
+    @GetMapping(path = ["/{id}/products/{idProduct}"])
+    fun findByIdProductByStoreId(@PathVariable id:Long, @PathVariable idProduct: Long): ResponseEntity<Product> {
+        val store = storeService.findByIdProductByStoreId(id, idProduct,)
         return ResponseEntity(store, HttpStatus.OK)
     }
 
@@ -91,7 +99,7 @@ class StoreController {
         return ResponseEntity.badRequest()
     }
 
-    @PutMapping(path = ["/{id}/products"])
+    @PutMapping(path = ["/{id}/products/{idProduct}"]) //TODO PRODUTO É DA LOJA?
     fun replaceProducts(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
         return try {
             val product = productDto.convert(id)
@@ -101,7 +109,7 @@ class StoreController {
             ResponseEntity(ex, HttpStatus.NOT_FOUND)
         }
     }
-    @PatchMapping(path = ["/{id}/products/{idProduct}"])
+    @PatchMapping(path = ["/{id}/products/{idProduct}"]) //TODO PRODUTO É DA LOJA?
     fun status(@PathVariable idProduct:Long, @RequestBody status: ProductStatus): ResponseEntity<Any>{
         return try {
             productService.changeStatus(idProduct, status)
@@ -126,6 +134,16 @@ class StoreController {
     fun withdraw(@PathVariable id:Long, @RequestBody value: ExtractDto): ResponseEntity<Any> {
         return try {
             storeService.withdraw(id, value.balance)
+            return ResponseEntity.noContent().build()
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @PatchMapping(path = ["/{id}/order/{idOrder}"])
+    fun order(@PathVariable id:Long,@PathVariable idOrder:Long, @RequestBody status: OrderStatus): ResponseEntity<Any> {
+        return try {
+            storeService.updateOrderStatus(id, idOrder, status)
             return ResponseEntity.noContent().build()
         }catch (ex: IdNoExistException) {
             ResponseEntity(ex, HttpStatus.NOT_FOUND)

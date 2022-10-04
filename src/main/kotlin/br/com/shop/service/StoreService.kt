@@ -2,6 +2,7 @@ package br.com.shop.service
 
 import br.com.shop.exception.IdNoExistException
 import br.com.shop.model.Product
+import br.com.shop.model.enums.OrderStatus
 import br.com.shop.model.store.Extract
 import br.com.shop.model.store.Store
 import br.com.shop.repository.StoreRepository
@@ -33,6 +34,10 @@ class StoreService {
 
     fun findAllProductsByStoreId(id: Long, pageable: Pageable): Page<List<Product>> {
         return storeRepository.findAllProductsByStoreId(id, pageable)
+    }
+
+    fun findByIdProductByStoreId(id: Long, idProduct: Long): Product {
+        return storeRepository.findByIdProductByStoreId(id, idProduct)
     }
 
     @Throws(IdNoExistException::class)
@@ -67,8 +72,7 @@ class StoreService {
             throw IdNoExistException(this.javaClass.name)
         }
     }
-
-    fun toggleFavorite(id: Long) {
-        //TODO
+    fun updateOrderStatus(id: Long, idOrder: Long, status: OrderStatus) {
+        storeRepository.updateOrderStatus(id, idOrder, status)
     }
 }

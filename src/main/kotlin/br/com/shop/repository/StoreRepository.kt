@@ -1,6 +1,7 @@
 package br.com.shop.repository
 
 import br.com.shop.model.Product
+import br.com.shop.model.enums.OrderStatus
 import br.com.shop.model.store.Extract
 import br.com.shop.model.store.Store
 import org.springframework.data.domain.Page
@@ -22,6 +23,11 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
     fun findAllProductsByStoreId(@Param("id") id: Long, pageable: Pageable): Page<List<Product>>
 
     @Transactional
+    @Query("SELECT p FROM Product p, Store s WHERE p.id = :idProduct and s.id = :id")
+    fun findByIdProductByStoreId(@Param("id") id: Long, @Param("idProduct") idProduct: Long): Product
+
+
+    @Transactional
     @Query("SELECT e FROM Store s, Extract e WHERE s.id = :id AND e.id = s.id")
     fun findExtractById(@Param("id") id: Long): Extract
 
@@ -29,7 +35,12 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
     @Modifying
     @Query("UPDATE Extract e SET e.balance= e.balance -:value WHERE e.id = " +
             "(SELECT s.extract FROM Store s WHERE s.id= :id)")
-    //UPDATE TABELA a JOIN TABLEB b ON a.colA = b.colB SET a.columnToUpdate = [VALOR]
      fun withdraw(@Param("id") id: Long,@Param("value") value: Double)
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Order e SET e.balance= e.balance -:value WHERE e.id = " +
+            "(SELECT s.extract FROM Store s WHERE s.id= :id)")
+    abstract fun updateOrderStatus(id: Long, idOrder: Long, status: OrderStatus)
 
 }
