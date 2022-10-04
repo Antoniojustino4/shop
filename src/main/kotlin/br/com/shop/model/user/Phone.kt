@@ -1,4 +1,4 @@
-package br.com.shop.model
+package br.com.shop.model.user
 
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -7,9 +7,9 @@ import javax.persistence.Id
 
 @Entity
 class Phone(
+    var DDD: Int,
+    var number: String,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
-    var DDD: Int,
-    var number: String
+    val id: Long = 0,
 )

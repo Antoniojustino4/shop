@@ -9,13 +9,14 @@ import javax.persistence.*
 class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
+    val id: Long = 0,
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
-    var carts: MutableList<Cart> = mutableListOf(),
+    val carts: MutableList<Cart> = mutableListOf(),
     @Enumerated
     private var status: OrderStatus = OrderStatus.ORDER_MADE,
     private var date: LocalDate = LocalDate.now(),
-    private var total: Double = 0.0
+    private var total: Double = 0.0,
+
 ) {
 
     init {

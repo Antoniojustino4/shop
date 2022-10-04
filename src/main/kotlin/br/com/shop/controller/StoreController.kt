@@ -1,7 +1,13 @@
 package br.com.shop.controller
 
+import br.com.shop.controller.dto.ExtractDto
+import br.com.shop.controller.dto.ProductDto
 import br.com.shop.controller.dto.StoreDto
-import br.com.shop.model.Store
+import br.com.shop.exception.IdNoExistException
+import br.com.shop.model.Product
+import br.com.shop.model.store.Store
+import br.com.shop.model.enums.ProductStatus
+import br.com.shop.service.ProductService
 import br.com.shop.service.StoreService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -25,6 +31,9 @@ class StoreController {
     @Autowired
     private lateinit var storeService: StoreService
 
+    @Autowired
+    private lateinit var productService: ProductService
+
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
                 @RequestParam(required = false) name: Optional<String>): ResponseEntity<Page<Store>> {
@@ -33,29 +42,13 @@ class StoreController {
     }
 
     @GetMapping(path = ["/{id}"])
-    //@PreAuthorize("hasRole('ADMIN')")
     fun findById(@PathVariable id:Long): ResponseEntity<Store> {
-        if (storeService.existsById(id)) {
-            val store = storeService.findById(id).get()
-            return ResponseEntity(store, HttpStatus.OK)
+        val optional = storeService.findById(id)
+        if (optional.isPresent){
+            return ResponseEntity(optional.get(), HttpStatus.OK)
         }
-        return ResponseEntity.notFound().build()
+        return ResponseEntity.ok().build()
     }
-
-    @PatchMapping(path = ["/{id}/toggleFavorite"])
-    fun toggleFavorite(@PathVariable id:Long): ResponseEntity<Unit>{
-        if (storeService.existsById(id)) {
-            storeService.toggleFavorite(id)
-            return ResponseEntity.ok().build()
-        }
-        return ResponseEntity.notFound().build()
-    }
-
-//    @GetMapping(path = ["by-id/{id}"])
-//    fun findByIdAuthenticationPrincipal(@PathVariable id:Long, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<Product> {
-//        println(userDetails)
-//        return ResponseEntity(productService.findById(id), HttpStatus.OK)
-//    }
 
     @PostMapping
     fun save(@RequestBody @Valid storeDto: StoreDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Store> {
@@ -64,21 +57,79 @@ class StoreController {
         return ResponseEntity.created(uri).body(storeSaved)
     }
 
-    @DeleteMapping(path = ["/{id}"])
-    fun delete(@PathVariable id:Long): ResponseEntity<Unit> {
-        if(storeService.existsById(id)) {
-            return ResponseEntity(storeService.delete(id), HttpStatus.NO_CONTENT)
-        }
-        return ResponseEntity.notFound().build()
-    }
-
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id:Long, @RequestBody @Valid storeDto: StoreDto): ResponseEntity<Store> {
-        if(storeService.existsById(id)) {
+    fun replace(@PathVariable id:Long, @RequestBody @Valid storeDto: StoreDto): ResponseEntity<Any> {
+        return try{
             val store = storeDto.convert(id)
             val newStoreDto = storeService.save(store)
             return ResponseEntity(newStoreDto, HttpStatus.NO_CONTENT)
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
         }
-        return ResponseEntity.notFound().build()
     }
+
+    @GetMapping(path = ["/{id}/products"])
+    fun findAllProductsByStoreId(
+        @PageableDefault(sort = ["id"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
+        @PathVariable id:Long): ResponseEntity<Page<List<Product>>> {
+        val store = storeService.findAllProductsByStoreId(id, pageable)
+        return ResponseEntity(store, HttpStatus.OK)
+    }
+
+    @PostMapping(path = ["/{id}/products"])
+    fun saveProducts(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
+        val optional = storeService.findById(id)
+        if (optional.isPresent){
+            val product = productDto.convert()
+            val store = optional.get()
+            store.products.add(product)
+            productService.save(product)
+
+            val uri: URI = uriBuilder.path("/products/{id}").buildAndExpand(product.id).toUri()
+            return ResponseEntity.created(uri).body(product)
+        }
+        return ResponseEntity.badRequest()
+    }
+
+    @PutMapping(path = ["/{id}/products"])
+    fun replaceProducts(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
+        return try {
+            val product = productDto.convert(id)
+            val newProductDto = productService.save(product)
+            ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
+    }
+    @PatchMapping(path = ["/{id}/products/{idProduct}"])
+    fun status(@PathVariable idProduct:Long, @RequestBody status: ProductStatus): ResponseEntity<Any>{
+        return try {
+            productService.changeStatus(idProduct, status)
+            ResponseEntity.ok().build()
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @GetMapping(path = ["/{id}/extract"])
+    fun extract(@PathVariable id:Long): ResponseEntity<Any> {
+        return try {
+            val extract = storeService.findExtractByStoreId(id)
+            val extractDto = ExtractDto(extract)
+            return ResponseEntity(extractDto, HttpStatus.OK)
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @PatchMapping(path = ["/{id}/extract/withdraw"])
+    fun withdraw(@PathVariable id:Long, @RequestBody value: ExtractDto): ResponseEntity<Any> {
+        return try {
+            storeService.withdraw(id, value.balance)
+            return ResponseEntity.noContent().build()
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
+    }
+
 }

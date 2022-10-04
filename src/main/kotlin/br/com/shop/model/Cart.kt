@@ -4,12 +4,13 @@ import javax.persistence.*
 
 @Entity
 class Cart(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
     @ManyToOne(cascade = [CascadeType.REFRESH])
     val product: Product,
     val quantity: Int,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
     val name: String = product.name,
-    val price: Double = product.price
+    val price: Double = product.price,
+
 )

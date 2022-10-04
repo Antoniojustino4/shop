@@ -1,12 +1,15 @@
 package br.com.shop.service
 
+import br.com.shop.exception.IdNoExistException
 import br.com.shop.model.Product
+import br.com.shop.model.enums.ProductStatus
 import br.com.shop.repository.ProductRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.Optional
+import kotlin.jvm.Throws
 
 @Service
 class ProductService {
@@ -23,24 +26,28 @@ class ProductService {
         return products
     }
 
-//    fun toggleFavorite(id: Long){
-//        val product = findById(id).get()
-//        productRepository.toggleFavorite(!product.isFavorite, id)
-//    }
-
     fun findById(id: Long): Optional<Product> {
         return productRepository.findById(id)
     }
 
     fun save(product: Product): Product {
-        return productRepository.save(product)
+        return if (product.id == 0L){
+            productRepository.save(product)
+        }else{
+            validId(product.id)
+            productRepository.save(product)
+        }
     }
 
-    fun delete(id: Long) {
-        productRepository.deleteById(id)
+    fun changeStatus(id: Long, status: ProductStatus) {
+        validId(id)
+        productRepository.changeStatus(status, id)
     }
 
-    fun existsById(id: Long): Boolean {
-        return productRepository.existsById(id)
+    @Throws(IdNoExistException::class)
+    private fun validId(id: Long) {
+        if (!productRepository.existsById(id)){
+            throw IdNoExistException(this.javaClass.name)
+        }
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page
 import javax.validation.constraints.DecimalMin
 import javax.validation.constraints.NotNull
 
-class CartDto(cart: Cart) {
+class CartDto(cart: Cart): Dto<Cart> {
     @NotNull(message = "The name field is mandatory")
     var product: Product
     @DecimalMin(value = "1", message = "The quantity field cannot is smaller that one")
@@ -17,12 +17,12 @@ class CartDto(cart: Cart) {
         this.quantity = cart.quantity
     }
 
-    fun convert(): Cart {
-        return Cart(0, product, quantity)
+    override fun convert(): Cart {
+        return Cart(product, quantity)
     }
 
-    fun convert(id: Long): Cart {
-        return Cart(id, product, quantity)
+    override fun convert(id: Long): Cart {
+        return Cart(product, quantity, id)
     }
 
     companion object {

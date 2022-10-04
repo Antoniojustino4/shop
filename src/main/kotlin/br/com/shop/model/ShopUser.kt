@@ -1,12 +1,11 @@
 package br.com.shop.model
 
+import br.com.shop.model.user.Address
+import br.com.shop.model.user.Card
 import javax.persistence.*
 
 @Entity
 class ShopUser(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
     var name: String,
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     var orderList: MutableList<Order> = mutableListOf(),
@@ -16,4 +15,7 @@ class ShopUser(
     var cardList: MutableList<Card> = mutableListOf(),
 //    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
 //    private var userCredentials: UserCredentials
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long = 0,
 )

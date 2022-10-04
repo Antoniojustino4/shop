@@ -1,4 +1,4 @@
-package br.com.shop.model
+package br.com.shop.model.user
 
 import java.time.LocalDate
 import javax.persistence.Entity
@@ -8,11 +8,11 @@ import javax.persistence.Id
 
 @Entity
 class Card(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
     var number: String,
     var holder: String,
     var securityCode: Int,
-    var dueDate: LocalDate
+    var dueDate: LocalDate,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
 )

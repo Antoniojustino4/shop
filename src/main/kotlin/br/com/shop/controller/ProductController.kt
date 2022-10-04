@@ -1,7 +1,9 @@
 package br.com.shop.controller
 
 import br.com.shop.controller.dto.ProductDto
+import br.com.shop.exception.IdNoExistException
 import br.com.shop.model.Product
+import br.com.shop.model.enums.ProductStatus
 import br.com.shop.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -12,8 +14,6 @@ import org.springframework.hateoas.server.ExposesResourceFor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.util.UriComponentsBuilder
-import java.net.URI
 import java.util.*
 import javax.validation.Valid
 
@@ -33,52 +33,32 @@ class ProductController {
     }
 
     @GetMapping(path = ["/{id}"])
-    //@PreAuthorize("hasRole('ADMIN')")
     fun findById(@PathVariable id:Long): ResponseEntity<Product> {
-        if (productService.existsById(id)) {
-            val product = productService.findById(id).get()
-            return ResponseEntity(product, HttpStatus.OK)
+        val optional = productService.findById(id)
+        if (optional.isPresent){
+            return ResponseEntity(optional.get(), HttpStatus.OK)
         }
-        return ResponseEntity.notFound().build()
-    }
-
-//    @PatchMapping(path = ["/{id}/toggleFavorite"])
-//    fun toggleFavorite(@PathVariable id:Long): ResponseEntity<Unit>{
-//        if (productService.existsById(id)) {
-//            productService.toggleFavorite(id)
-//            return ResponseEntity.ok().build()
-//        }
-//        return ResponseEntity.notFound().build()
-//    }
-
-//    @GetMapping(path = ["by-id/{id}"])
-//    fun findByIdAuthenticationPrincipal(@PathVariable id:Long, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<Product> {
-//        println(userDetails)
-//        return ResponseEntity(productService.findById(id), HttpStatus.OK)
-//    }
-
-    @PostMapping
-    fun save(@RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Product> {
-        val productSaved= productService.save(productDto.convert())
-        val uri: URI = uriBuilder.path("/products/{id}").buildAndExpand(productSaved.id).toUri()
-        return ResponseEntity.created(uri).body(productSaved)
-    }
-
-    @DeleteMapping(path = ["/{id}"])
-    fun delete(@PathVariable id:Long): ResponseEntity<Unit> {
-        if(productService.existsById(id)) {
-            return ResponseEntity(productService.delete(id), HttpStatus.NO_CONTENT)
-        }
-        return ResponseEntity.notFound().build()
+        return ResponseEntity.ok().build()
     }
 
     @PutMapping(path = ["/{id}"])
-    fun replace(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto): ResponseEntity<Product> {
-        if(productService.existsById(id)) {
+    fun replace(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto): ResponseEntity<Any> {
+        return try {
             val product = productDto.convert(id)
             val newProductDto = productService.save(product)
-            return ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
+            ResponseEntity(newProductDto, HttpStatus.NO_CONTENT)
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
         }
-        return ResponseEntity.notFound().build()
+    }
+
+    @PatchMapping(path = ["/{id}"])
+    fun status(@PathVariable id:Long, @RequestBody status: ProductStatus): ResponseEntity<Any>{
+        return try {
+            productService.changeStatus(id, status)
+            ResponseEntity.ok().build()
+        }catch (ex: IdNoExistException) {
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
     }
 }

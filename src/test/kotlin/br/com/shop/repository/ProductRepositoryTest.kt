@@ -17,7 +17,7 @@ class ProductRepositoryTest(
     val storeRepository: StoreRepository
 ) {
 
-    val product = Product(0, "Pan", "Red pan", 49.99,
+    val product = Product( "Pan", "Red pan", 49.99,
         "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg",)
 
     @AfterEach

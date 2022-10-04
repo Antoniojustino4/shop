@@ -32,11 +32,12 @@ class OrderController {
 
     @GetMapping(path = ["/{id}"])
     fun findById(@PathVariable id: Long): ResponseEntity<Order> {
-        if (orderService.existsById(id)) {
-            val order = orderService.findById(id).get()
-            return ResponseEntity(order, HttpStatus.OK)
+        val optional = orderService.findById(id)
+        if (optional.isPresent){
+            return ResponseEntity(optional.get(), HttpStatus.OK)
         }
-        return ResponseEntity.notFound().build()
+        return ResponseEntity.ok().build()
+
     }
 
     @PostMapping

@@ -5,7 +5,7 @@ import br.com.shop.model.Order
 import org.springframework.data.domain.Page
 import javax.validation.constraints.NotEmpty
 
-class OrderDto(order: Order) {
+class OrderDto(order: Order):Dto<Order> {
     @NotEmpty(message = "The carts field is mandatory")
     var carts: List<Cart>
 
@@ -13,11 +13,11 @@ class OrderDto(order: Order) {
         this.carts = order.carts
     }
 
-    fun convert(): Order {
+    override fun convert(): Order {
         return Order(0, carts.toMutableList())
     }
 
-    fun convert(id: Long): Order {
+    override fun convert(id: Long): Order {
         return Order(id, carts.toMutableList())
     }
 

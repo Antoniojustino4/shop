@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page
 import javax.validation.constraints.DecimalMin
 import javax.validation.constraints.NotBlank
 
-class ProductDto(product: Product) {
+class ProductDto(product: Product):Dto<Product> {
     @NotBlank(message = "The name field is mandatory")
     var name: String
     @NotBlank(message = "The description field is mandatory")
@@ -22,12 +22,12 @@ class ProductDto(product: Product) {
         this.imageUrl = product.imageUrl
     }
 
-    fun convert(): Product {
-        return Product(0, name, description, price, imageUrl)
+    override fun convert(): Product {
+        return Product(name, description, price, imageUrl)
     }
 
-    fun convert(id: Long): Product {
-        return Product(id, name, description, price, imageUrl)
+    override fun convert(id: Long): Product {
+        return Product(name, description, price, imageUrl,id = id)
     }
 
     companion object {
