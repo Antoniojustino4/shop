@@ -1,11 +1,13 @@
 package br.com.shop.repository
 
 import br.com.shop.model.Product
+import br.com.shop.model.enums.ProductStatus
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
 
 @DataJpaTest
@@ -13,8 +15,6 @@ import org.springframework.test.context.ActiveProfiles
 class ProductRepositoryTest(
     @Autowired
     val repository: ProductRepository,
-    @Autowired
-    val storeRepository: StoreRepository
 ) {
 
     val product = Product( "Pan", "Red pan", 49.99,
@@ -26,46 +26,22 @@ class ProductRepositoryTest(
     }
 
     @Test
-    fun `Get by id`(){
-        val productSaved = repository.save(product)
-        val product= repository.findById(productSaved.id)
+    fun `Get by name`(){
+        repository.save(product)
+        val productFound = repository.findByName(product.name, Pageable.unpaged())
 
-        Assertions.assertNotNull(product.get())
+        Assertions.assertNotNull(productFound.get())
     }
 
     @Test
-    fun `Post`(){
-        val productSaved = repository.save(product)
-
-        Assertions.assertNotNull(productSaved)
-        Assertions.assertNotNull(productSaved.id)
+    fun `Change status`(){
+        repository.save(product)
+        repository.changeStatus(ProductStatus.UNAVAILABLE, product.id)
+        val productFound = repository.findById(product.id)
+        if (productFound.isPresent) {
+            Assertions.assertNotEquals(productFound.get().status, product.status)
+        }else{
+            Assertions.fail()
+        }
     }
-
-    @Test
-    fun `Put`(){
-        var productSaved = repository.save(product)
-
-        productSaved.description = "Blue Hat"
-        productSaved.name = "Hat"
-        productSaved.price = 25.99
-        productSaved = repository.save(product)
-
-        Assertions.assertNotNull(productSaved)
-        Assertions.assertNotNull(productSaved.id)
-        Assertions.assertEquals("Blue Hat", productSaved.description)
-        Assertions.assertEquals("Hat", productSaved.name)
-        Assertions.assertEquals(25.99, productSaved.price)
-    }
-
-    @Test
-    fun `Delete`(){
-        val productSaved = repository.save(product)
-
-        repository.delete(productSaved)
-
-        val existsId = repository.existsById(productSaved.id)
-
-        Assertions.assertFalse(existsId)
-    }
-
 }

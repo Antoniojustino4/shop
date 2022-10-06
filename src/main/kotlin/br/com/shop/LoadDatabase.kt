@@ -50,10 +50,11 @@ internal class LoadDatabase {
             )
 
             val store = Store("test",
-                arrayListOf(product1,product2,product3,product4))
+                arrayListOf(product1,product2,product3))
 
 //            store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 200.0))
-            storeRepository.save(store)
+//            storeRepository.save(store)
+//            productRepository.save(product4)
             println("aaaaaa")
 //
 //            productRepository.save(product1)

@@ -73,6 +73,13 @@ class StoreService {
         }
     }
     fun updateOrderStatus(id: Long, idOrder: Long, status: OrderStatus) {
-        storeRepository.updateOrderStatus(id, idOrder, status)
+        //storeRepository.updateOrderStatus(id, idOrder, status)
+    }
+
+    @Throws(IdNoExistException::class)
+    fun isProductThisStore(id: Long, idProduct: Long):Boolean {
+        validId(id)
+//        return storeRepository.findByIdProductByStoreId(id, idProduct) != null
+        return true
     }
 }
