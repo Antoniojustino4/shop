@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 class Transaction(
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     val type: TypeTransaction,
     var value: Double,
     @Id

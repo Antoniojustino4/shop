@@ -12,7 +12,7 @@ class Order(
     val id: Long = 0,
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     val carts: MutableList<Cart> = mutableListOf(),
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private var status: OrderStatus = OrderStatus.ORDER_MADE,
     private var date: LocalDate = LocalDate.now(),
     private var total: Double = 0.0,

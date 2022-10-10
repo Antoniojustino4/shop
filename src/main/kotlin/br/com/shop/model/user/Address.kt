@@ -9,7 +9,7 @@ class Address(
     var district: String,
     var zipCode: String,
     var city: String,
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     var state: State,
     var number: Int,
     var complement: String,

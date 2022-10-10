@@ -9,7 +9,7 @@ class Product(
     var description: String,
     var price: Double,
     var imageUrl: String,
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     var status: ProductStatus = ProductStatus.AVAILABLE,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

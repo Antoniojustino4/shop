@@ -82,9 +82,13 @@ class StoreController {
     }
 
     @GetMapping(path = ["/{id}/products/{idProduct}"])
-    fun findByIdProductByStoreId(@PathVariable id:Long, @PathVariable idProduct: Long): ResponseEntity<Product> {
-        val store = storeService.findByIdProductByStoreId(id, idProduct)
-        return ResponseEntity(store, HttpStatus.OK)
+    fun findByIdProductByStoreId(@PathVariable id:Long, @PathVariable idProduct: Long): ResponseEntity<Any> {
+        return try {
+            val store = storeService.findByIdProductByStoreId(id, idProduct)
+            ResponseEntity(store, HttpStatus.OK)
+        }catch (ex: ProductIsNotOfThisStoreException){
+            ResponseEntity(ex, HttpStatus.NOT_FOUND)
+        }
     }
 
     @PostMapping(path = ["/{id}/products"])

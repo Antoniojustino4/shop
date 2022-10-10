@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
+import kotlin.streams.toList
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -17,7 +18,7 @@ class ProductRepositoryTest(
     val repository: ProductRepository,
 ) {
 
-    val product = Product( "Pan", "Red pan", 49.99,
+    private val product = Product( "Pan", "Red pan", 49.99,
         "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg",)
 
     @AfterEach
@@ -28,9 +29,11 @@ class ProductRepositoryTest(
     @Test
     fun `Get by name`(){
         repository.save(product)
-        val productFound = repository.findByName(product.name, Pageable.unpaged())
+        val products = repository.findByName(product.name, Pageable.unpaged()).get()
+        val list= products.toList()
 
-        Assertions.assertNotNull(productFound.get())
+        Assertions.assertNotNull(products)
+        Assertions.assertTrue(list.contains(product))
     }
 
     @Test
