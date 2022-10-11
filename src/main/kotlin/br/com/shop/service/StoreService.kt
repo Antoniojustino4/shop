@@ -34,7 +34,7 @@ class StoreService {
         return storeRepository.findById(id)
     }
 
-    fun findAllProductsByStoreId(id: Long, pageable: Pageable): Page<List<Product>> {
+    fun findAllProductsByStoreId(id: Long, pageable: Pageable): Page<Product> {
         return storeRepository.findAllProductsByIdStore(id, pageable)
     }
 

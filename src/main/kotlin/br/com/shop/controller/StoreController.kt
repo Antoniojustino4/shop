@@ -76,7 +76,7 @@ class StoreController {
 
     @GetMapping(path = ["/{id}/products"])
     fun findAllProductsByStoreId(@PageableDefault(sort = ["id"], direction = Sort.Direction.DESC,
-        page = 0, size = 10) pageable: Pageable, @PathVariable id:Long): ResponseEntity<Page<List<Product>>> {
+        page = 0, size = 10) pageable: Pageable, @PathVariable id:Long): ResponseEntity<Page<Product>> {
         val store = storeService.findAllProductsByStoreId(id, pageable)
         return ResponseEntity(store, HttpStatus.OK)
     }

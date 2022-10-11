@@ -19,7 +19,7 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
 
     @Transactional
     @Query("SELECT s.products FROM Store s WHERE s.id = :id")
-    fun findAllProductsByIdStore(@Param("id") id: Long, pageable: Pageable): Page<List<Product>>
+    fun findAllProductsByIdStore(@Param("id") id: Long, pageable: Pageable): Page<Product>
 
     @Transactional
     @Query("SELECT * FROM product WHERE id=(SELECT st.products_id FROM store_products st WHERE st.store_id= :id AND st.products_id= :idProduct);", nativeQuery = true)

@@ -46,12 +46,12 @@ class StoreRepositoryTest(
     fun `Find All Products By IdStore`(){
         repository.saveAll(arrayListOf(store, storeOther))
 
-        val stores = repository.findAllProductsByIdStore(store.id, Pageable.unpaged()).get()
-        val list= stores.toList()
+        val list = repository.findAllProductsByIdStore(store.id, Pageable.unpaged()).get()
+        val products = list.toList()
 
-        Assertions.assertNotNull(stores)
-        Assertions.assertTrue(list.contains(store.products))
-        Assertions.assertFalse(list.contains(storeOther.products))
+        Assertions.assertNotNull(list)
+        Assertions.assertTrue(products.contains(product))
+        Assertions.assertFalse(products.contains(productOther))
     }
 
     @Test
