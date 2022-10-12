@@ -35,9 +35,16 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Extract e SET e.balance= e.balance -:value WHERE e.id = " +
+    @Query("UPDATE Extract e SET e.balance= (e.balance - :value) WHERE e.id = " +
             "(SELECT s.extract FROM Store s WHERE s.id= :id)")
      fun withdraw(@Param("id") id: Long,@Param("value") value: Double)
+
+//    @Transactional
+//    @Modifying
+//    @Query("UPDATE Extract e SET e.balance= e.balance -:value WHERE e.id = " +
+//            "(SELECT s.extract FROM Store s WHERE s.id= :id)")
+//    fun withdraw(@Param("id") id: Long,@Param("value") value: Double)
+
 
 //    @Transactional
 //    @Modifying

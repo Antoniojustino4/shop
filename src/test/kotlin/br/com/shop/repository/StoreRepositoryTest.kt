@@ -1,7 +1,11 @@
 package br.com.shop.repository
 
+import br.com.shop.exception.ProductIsNotOfThisStoreException
 import br.com.shop.model.Product
+import br.com.shop.model.enums.ProductStatus
+import br.com.shop.model.enums.TypeTransaction
 import br.com.shop.model.store.Store
+import br.com.shop.model.store.Transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -56,17 +60,49 @@ class StoreRepositoryTest(
 
     @Test
     fun `Find By IdProduct By IdStore`(){
-        repository.saveAll(arrayListOf(store, storeOther))
-        repository.findByIdProductByIdStore(store.id,product.id)
+        repository.save(store)
+        val product = findByIdProductByIdStore(store.id,product.id)
 
-        //TODO FALTA TERMINAR
+        Assertions.assertNotNull(product)
+        Assertions.assertEquals(this.product.id, product.id)
+        Assertions.assertTrue(product == this.product)
     }
 
     @Test
-    fun `Find Extract By Id`(){}
+    fun `Find Extract By Id`(){
+        repository.save(store)
+        val extract = repository.findExtractById(store.extract.id)
+
+        Assertions.assertNotNull(extract)
+        Assertions.assertTrue(extract == store.extract)
+    }
 
     @Test
-    fun `Withdraw`(){}
+    fun `Withdraw`(){
+        store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 200.00))
+        repository.save(store)
+        repository.withdraw(store.id, 100.0)
+        val storeOther = repository.findById(store.id)
 
+        Assertions.assertNotNull(storeOther)
+        Assertions.assertEquals(store.extract.balance, storeOther.get().extract.balance)
+    }
+
+
+    private fun findByIdProductByIdStore(id: Long, idProduct: Long): Product {
+        val productString = repository.findByIdProductByIdStore(id, idProduct)
+        if (productString == null || productString.javaClass != String::class.java) {
+            throw ProductIsNotOfThisStoreException()
+        }
+        val list = productString.split(",")
+        return Product(
+            list[3],
+            list[1],
+            list[4].toDouble(),
+            list[2],
+            ProductStatus.convert(list[5]),
+            list[0].toLong(),
+        )
+    }
 
 }

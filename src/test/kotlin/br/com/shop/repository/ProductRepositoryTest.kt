@@ -42,7 +42,7 @@ class ProductRepositoryTest(
         repository.changeStatus(ProductStatus.UNAVAILABLE, product.id)
         val productFound = repository.findById(product.id)
         if (productFound.isPresent) {
-            Assertions.assertNotEquals(productFound.get().status, ProductStatus.UNAVAILABLE)
+            Assertions.assertNotEquals(ProductStatus.UNAVAILABLE, productFound.get().status)
         }else{
             Assertions.fail()
         }

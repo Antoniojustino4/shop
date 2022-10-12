@@ -12,7 +12,7 @@ import kotlin.jvm.Throws
 
 @Entity
 class Extract(
-    var balance: Double = 200.0,
+    var balance: Double = 0.0,
     @OneToMany
     private val transactions: MutableList<Transaction> = mutableListOf(),
     @Id
@@ -37,4 +37,23 @@ class Extract(
         return Collections.unmodifiableList(transactions)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Extract
+
+        if (balance != other.balance) return false
+        if (transactions != other.transactions) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = balance.hashCode()
+        result = 31 * result + transactions.hashCode()
+        result = 31 * result + id.hashCode()
+        return result
+    }
 }
