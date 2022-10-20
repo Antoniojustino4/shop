@@ -18,8 +18,8 @@ interface ProductRepository: PagingAndSortingRepository<Product, Long>{
 
     @Transactional
     @Modifying
-    @Query("UPDATE Product p SET p.status = :status WHERE p.id = :id")
-    fun changeStatus(@Param("status") status: ProductStatus, @Param("id")  id: Long)
+    @Query("UPDATE Product p SET p.status= :status WHERE p.id= :id")
+    fun changeStatus(@Param("status") status: ProductStatus, @Param("id") id: Long): Int
 
 //    @Transactional
 //    @Modifying

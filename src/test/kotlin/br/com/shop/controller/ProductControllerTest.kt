@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import java.net.URI
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -59,7 +58,7 @@ class ProductControllerTest(
 
     @Test
     fun `Get by id with id non-existent`() {
-        mockMvc.perform(get("$url/3209583275")
+        mockMvc.perform(get("$url/0")
             .accept(APPLICATION_JSON)
             .contentType(APPLICATION_JSON))
             .andExpect(status().isNotFound)

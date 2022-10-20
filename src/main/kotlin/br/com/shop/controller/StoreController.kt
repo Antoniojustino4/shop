@@ -8,7 +8,6 @@ import br.com.shop.exception.ProductIsNotOfThisStoreException
 import br.com.shop.model.Product
 import br.com.shop.model.store.Store
 import br.com.shop.model.enums.ProductStatus
-import br.com.shop.service.OrderService
 import br.com.shop.service.ProductService
 import br.com.shop.service.StoreService
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,8 +33,6 @@ class StoreController {
     private lateinit var storeService: StoreService
     @Autowired
     private lateinit var productService: ProductService
-    @Autowired
-    private lateinit var orderService: OrderService
 
     @GetMapping
     fun findAll(@PageableDefault(sort = ["name"], direction = Sort.Direction.DESC, page = 0, size = 10) pageable: Pageable,
@@ -120,7 +117,7 @@ class StoreController {
             ResponseEntity(ex, HttpStatus.NOT_FOUND)
         }
     }
-    @PatchMapping(path = ["/{id}/products/{idProduct}"]) //TODO PRODUTO É DA LOJA?
+    @PatchMapping(path = ["/{id}/products/{idProduct}/changeStatus"]) //TODO PRODUTO É DA LOJA?
     fun status(@PathVariable id:Long, @PathVariable idProduct:Long, @RequestBody status: ProductStatus): ResponseEntity<Any>{
         return try {
             if (storeService.isProductThisStore(id, idProduct)) {
@@ -146,11 +143,11 @@ class StoreController {
     }
 
     @PatchMapping(path = ["/{id}/extract/withdraw"])
-    fun withdraw(@PathVariable id:Long, @RequestBody value: ExtractDto): ResponseEntity<Any> {
+    fun withdraw(@PathVariable id:Long, @RequestBody @Valid value: ExtractDto): ResponseEntity<Any> {
         return try {
             storeService.withdraw(id, value.balance)
             return ResponseEntity.noContent().build()
-        }catch (ex: IdNoExistException) {
+        }catch (ex: Throwable) {
             ResponseEntity(ex, HttpStatus.NOT_FOUND)
         }
     }

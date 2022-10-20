@@ -1,7 +1,9 @@
 package br.com.shop
 
 import br.com.shop.model.*
+import br.com.shop.model.enums.TypeTransaction
 import br.com.shop.model.store.Store
+import br.com.shop.model.store.Transaction
 import br.com.shop.repository.ProductRepository
 import br.com.shop.repository.StoreRepository
 import org.slf4j.Logger
@@ -51,6 +53,7 @@ internal class LoadDatabase {
 
             val store = Store("test",
                 arrayListOf(product1,product2))
+
             val store2 = Store("test2",
                 arrayListOf(product3,product4))
 
@@ -58,6 +61,10 @@ internal class LoadDatabase {
             storeRepository.save(store)
             storeRepository.save(store2)
             println("aaaaaa")
+
+            store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 500.0))
+            storeRepository.save(store)
+
 //
 //            productRepository.save(product1)
 //            productRepository.save(product2)

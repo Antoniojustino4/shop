@@ -1,6 +1,7 @@
 package br.com.shop.service
 
 import br.com.shop.exception.IdNoExistException
+import br.com.shop.exception.InsufficientBalanceException
 import br.com.shop.exception.ProductIsNotOfThisStoreException
 import br.com.shop.model.Product
 import br.com.shop.model.enums.OrderStatus
@@ -61,10 +62,13 @@ class StoreService {
         return storeRepository.findExtractById(id)
     }
 
-    @Throws(IdNoExistException::class)
+    @Throws(IdNoExistException::class, InsufficientBalanceException::class)
     fun withdraw(id: Long, value: Double) {
         validId(id)
-        storeRepository.withdraw(id, value)
+        val returned = storeRepository.withdraw(id, value)
+        if (returned != 1){
+            throw InsufficientBalanceException()
+        }
     }
 
     @Throws(IdNoExistException::class)

@@ -26,7 +26,7 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
     fun findByIdProductByIdStore(@Param("id") id: Long, @Param("idProduct") idProduct: Long): String?
 
     @Transactional
-    @Query("SELECT COUNT(*) > 0 FROM store_products st WHERE st.store_id= 1 AND st.products_id= 1", nativeQuery = true)
+    @Query("SELECT COUNT(*) > 0 FROM store_products st WHERE st.store_id= :id AND st.products_id= :idProduct", nativeQuery = true)
     fun isProductThisStore(@Param("id") id: Long, @Param("idProduct") idProduct: Long): Boolean
 
     @Transactional
@@ -35,9 +35,9 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Extract e SET e.balance= (e.balance - :value) WHERE e.id = " +
+    @Query("UPDATE Extract e SET e.balance= (e.balance - :value) WHERE e.balance >= :value AND e.id = " +
             "(SELECT s.extract FROM Store s WHERE s.id= :id)")
-     fun withdraw(@Param("id") id: Long,@Param("value") value: Double)
+     fun withdraw(@Param("id") id: Long,@Param("value") value: Double): Int
 
 //    @Transactional
 //    @Modifying
