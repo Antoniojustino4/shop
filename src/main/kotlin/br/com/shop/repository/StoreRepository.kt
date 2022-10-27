@@ -30,7 +30,7 @@ interface StoreRepository: PagingAndSortingRepository<Store, Long> {
     fun isProductThisStore(@Param("id") id: Long, @Param("idProduct") idProduct: Long): Boolean
 
     @Transactional
-    @Query("SELECT e FROM Store s, Extract e WHERE s.id = :id AND e.id = s.id")
+    @Query("SELECT e FROM Store s, Extract e WHERE s.id = :id AND e.id = s.extract.id")
     fun findExtractById(@Param("id") id: Long): Extract
 
     @Transactional

@@ -77,6 +77,7 @@ class StoreService {
             storeRepository.save(store)
         } else {
             validId(store.id)
+            store.extract= storeRepository.findExtractById(store.id)
             storeRepository.save(store)
         }
     }

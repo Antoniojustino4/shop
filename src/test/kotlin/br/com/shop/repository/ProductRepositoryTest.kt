@@ -2,7 +2,6 @@ package br.com.shop.repository
 
 import br.com.shop.model.Product
 import br.com.shop.model.enums.ProductStatus
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,10 +20,6 @@ class ProductRepositoryTest(
     private val product = Product( "Pan", "Red pan", 49.99,
         "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg")
 
-    @AfterEach
-    fun `cleaning repository`() {
-        repository.deleteAll()
-    }
 
     @BeforeEach
     fun `save object`() {

@@ -125,7 +125,7 @@ class StoreRepositoryTest(
     @Test
     fun `Find Extract By Id`(){
         repository.save(store)
-        val extract = repository.findExtractById(store.extract.id)
+        val extract = store.extract.let { repository.findExtractById(it.id) }
 
         Assertions.assertNotNull(extract)
         Assertions.assertTrue(extract == store.extract)

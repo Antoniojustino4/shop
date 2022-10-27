@@ -1,6 +1,7 @@
 package br.com.shop.controller.dto
 
 import br.com.shop.model.Product
+import br.com.shop.model.store.Extract
 import br.com.shop.model.store.Store
 import org.springframework.data.domain.Page
 import javax.validation.constraints.NotBlank

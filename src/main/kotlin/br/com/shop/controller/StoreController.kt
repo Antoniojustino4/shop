@@ -45,10 +45,11 @@ class StoreController {
     }
 
     @GetMapping(path = ["/{id}"])
-    fun findById(@PathVariable id:Long): ResponseEntity<Store> {
+    fun findById(@PathVariable id:Long, uriBuilder: UriComponentsBuilder): ResponseEntity<Store> {
         val optional = storeService.findById(id)
         if (optional.isPresent){
-            return ResponseEntity(optional.get(), HttpStatus.OK)
+            val store= optional.get()
+            return ResponseEntity(store, HttpStatus.OK)
         }
         return ResponseEntity.notFound().build()
     }

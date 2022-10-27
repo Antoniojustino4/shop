@@ -8,8 +8,8 @@ class Store(
     var name: String,
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     val products: MutableList<Product> = mutableListOf(),
-    @OneToOne(cascade = [CascadeType.PERSIST])
-    val extract: Extract = Extract(),
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
+    var extract: Extract = Extract(),
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,

@@ -1,15 +1,16 @@
 package br.com.shop.controller
 
+import br.com.shop.Utils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.net.URI
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -20,48 +21,37 @@ class ProductControllerTest(
 ) {
     private var id :Long = 0
     private val url = URI("/products")
+    private val utils = Utils(mockMvc)
 
     fun saveObject() {
-        id = saveObjects(this.mockMvc)
+        id = utils.saveProduct()
     }
 
     @Test
     fun `Get isEmpty`() {
-        mockMvc.perform(get(url)
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
+        utils.request(get(url), status().isOk)
     }
+
 
     @Test
     fun `Get by name`() {
         saveObject()
 
-        mockMvc.perform(get("$url").requestAttr("name", "Pan")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
-            .andReturn()
+        utils.request(get("$url").requestAttr("name", "Pan"), status().isOk)
     }
 
     @Test
     fun `Get by id`() {
         saveObject()
 
-        mockMvc.perform(get("$url/$id")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk)
+        utils.request(get("$url/$id"), status().isOk)
             .andExpect(jsonPath("$.name").isNotEmpty)
-            .andExpect(jsonPath("$.name").value("Pan"))
+            .andExpect(jsonPath("$.name").value("Pan")).andReturn()
     }
 
     @Test
     fun `Get by id with id non-existent`() {
-        mockMvc.perform(get("$url/0")
-            .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON))
-            .andExpect(status().isNotFound)
+        utils.request(get("$url/0"), status().isNotFound)
     }
 
 //    @Test
