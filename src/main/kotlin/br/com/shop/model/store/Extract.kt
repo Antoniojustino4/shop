@@ -17,7 +17,7 @@ class Extract(
     private val transactions: MutableList<Transaction> = mutableListOf(),
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val idExtract: Long = 0,
 ){
 
     @Throws(InsufficientBalanceException::class)
@@ -45,7 +45,7 @@ class Extract(
 
         if (balance != other.balance) return false
         if (transactions != other.transactions) return false
-        if (id != other.id) return false
+        if (idExtract != other.idExtract) return false
 
         return true
     }
@@ -53,7 +53,7 @@ class Extract(
     override fun hashCode(): Int {
         var result = balance.hashCode()
         result = 31 * result + transactions.hashCode()
-        result = 31 * result + id.hashCode()
+        result = 31 * result + idExtract.hashCode()
         return result
     }
 }

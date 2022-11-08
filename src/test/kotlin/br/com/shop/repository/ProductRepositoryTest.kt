@@ -22,12 +22,12 @@ class ProductRepositoryTest(
 
 
     @BeforeEach
-    fun `save object`() {
+    fun `save product`() {
         repository.save(product)
     }
 
     @Test
-    fun `Get by name`(){
+    fun `find product by name`(){
         val products = repository.findByName(product.name, Pageable.unpaged()).get()
         val list= products.toList()
 
@@ -36,14 +36,14 @@ class ProductRepositoryTest(
     }
 
     @Test
-    fun `Get by name not exist`(){
+    fun `return list empty when search for with name non-existent`(){
         val products = repository.findByName("", Pageable.unpaged())
 
         Assertions.assertEquals(0, products.totalElements)
     }
 
     @Test
-    fun `Change status`(){
+    fun `change status product`(){
         val returned = repository.changeStatus(ProductStatus.UNAVAILABLE, product.id)
         if (returned != 1) {
             Assertions.fail<Any>()
@@ -51,8 +51,8 @@ class ProductRepositoryTest(
     }
 
     @Test
-    fun `Change status is product not exist`(){
-        val returned = repository.changeStatus(ProductStatus.UNAVAILABLE, 9999)
+    fun `try change status with product not-existent`(){
+        val returned = repository.changeStatus(ProductStatus.UNAVAILABLE, -9999)
         if (returned == 1) {
             Assertions.fail<Any>()
         }

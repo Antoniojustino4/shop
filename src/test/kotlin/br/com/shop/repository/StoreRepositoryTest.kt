@@ -35,7 +35,7 @@ class StoreRepositoryTest(
     }
 
     @Test
-    fun `Get by name`(){
+    fun `find store by name`(){
         repository.saveAll(arrayListOf(store, storeOther))
         val stores= repository.findByName(store.name, Pageable.unpaged()).get()
         val list= stores.toList()
@@ -46,7 +46,7 @@ class StoreRepositoryTest(
     }
 
     @Test
-    fun `Get by name not exist`() {
+    fun `find store by name not exist`() {
         repository.saveAll(arrayListOf(store, storeOther))
         val stores= repository.findByName("store.name", Pageable.unpaged()).get()
         val list= stores.toList()
@@ -56,7 +56,7 @@ class StoreRepositoryTest(
     }
 
     @Test
-    fun `Find All Products By IdStore`(){
+    fun `find all products of one store`(){
         repository.saveAll(arrayListOf(store, storeOther))
 
         val list = repository.findAllProductsByIdStore(store.id, Pageable.unpaged()).get()
@@ -69,7 +69,7 @@ class StoreRepositoryTest(
 
 
     @Test
-    fun `Find All Products By IdStore non-existent`(){
+    fun `find all products of one store non-existent`(){
         repository.saveAll(arrayListOf(store, storeOther))
 
         val list = repository.findAllProductsByIdStore(store.id, Pageable.unpaged()).get()
@@ -81,7 +81,7 @@ class StoreRepositoryTest(
     }
 
     @Test
-    fun `Find By IdProduct By IdStore`(){
+    fun `find product from store`(){
         repository.save(store)
         val product = findByIdProductByIdStore(store.id,product.id)
 
@@ -91,53 +91,49 @@ class StoreRepositoryTest(
     }
 
     @Test
-    fun `Find By IdProduct non-existent By IdStore`(){
+    fun `find product non-existent from store`(){
         repository.save(store)
 
         Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) { findByIdProductByIdStore(store.id, 0); }
     }
 
     @Test
-    fun `Find By IdProduct By IdStore non-existent`(){
+    fun `find product of one store non-existent`(){
         repository.save(store)
 
         Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) { findByIdProductByIdStore(0, product.id); }
     }
 
     @Test
-    fun `isProduct this Store`(){
-        repository.save(store)
+    fun `is this product of this store`(){
+        repository.saveAll(arrayListOf(store, storeOther))
+
         Assertions.assertTrue(repository.isProductThisStore(store.id, product.id))
-    }
-
-    @Test
-    fun `isProduct not from this Store`(){
-        repository.save(store)
         Assertions.assertFalse(repository.isProductThisStore(store.id, productOther.id))
     }
 
     @Test
-    fun `isProduct this Store non-existent`(){
+    fun `is this product of this store non-existent`(){
         repository.save(store)
-        Assertions.assertFalse(repository.isProductThisStore(store.id, productOther.id))
+        Assertions.assertFalse(repository.isProductThisStore(store.id, -1))
     }
 
     @Test
-    fun `Find Extract By Id`(){
-        repository.save(store)
-        val extract = store.extract.let { repository.findExtractById(it.id) }
+    fun `find extract from store id`(){
+        repository.saveAll(arrayListOf(store, storeOther))
+        val extract = repository.findExtractById(storeOther.id)
 
         Assertions.assertNotNull(extract)
-        Assertions.assertTrue(extract == store.extract)
+        Assertions.assertTrue(extract.idExtract == storeOther.extract.idExtract)
     }
 
     @Test
-    fun `Find Extract By Id not-existent`(){
+    fun `find extract from store id not-existent`(){
         Assertions.assertThrows(EmptyResultDataAccessException::class.java){repository.findExtractById(0)}
     }
 
     @Test
-    fun `Withdraw`(){
+    fun `withdraw`(){
         store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 200.00))
         repository.save(store)
 

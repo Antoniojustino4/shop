@@ -11,8 +11,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 
 class Utils(
-    var mockMvc: MockMvc
+    private val mockMvc: MockMvc
 ) {
+    val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
+            "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+
+    val storeJson = "{\"name\" : \"Test\"}"
 
     private fun getId(response: MvcResult, domain: String): Long {
         val locale = response.response.getHeaderValue("Location").toString()
@@ -22,13 +26,29 @@ class Utils(
         return matchResult?.groupValues?.get(2)?.toLong() ?: 0
     }
 
-    fun saveProduct(): Long {
-        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
-                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+    fun request(mockRequest: MockHttpServletRequestBuilder, status: ResultMatcher): ResultActions {
+        return mockMvc.perform(
+            mockRequest.accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status)
+    }
 
-        val idStore = saveStoreWithReturnUrl()
+
+    fun saveObjectsWithReturnId(): List<Long> {
+        val idStore = saveStoreWithReturnId()
+        val idProduct = saveProductWithReturnId(idStore.toString())
+
+        return listOf(idStore, idProduct)
+    }
+
+    fun saveProductWithReturnId(): Long {
+        val idStore = saveStoreWithReturnId()
+        return saveProductWithReturnId(idStore.toString())
+    }
+
+    private fun saveProductWithReturnId(idStore: String?): Long {
         val response = mockMvc.perform(
-            MockMvcRequestBuilders.post("$idStore/products").content(productJson)
+            MockMvcRequestBuilders.post("/stores/$idStore/products").content(productJson)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
         )
@@ -37,36 +57,20 @@ class Utils(
         return getId(response, "products")
     }
 
-    private fun saveStoreWithReturnUrl(): String? {
-        val storeJson = "{\"name\" : \"Test\"}"
 
-        val response = mockMvc.perform(
-            MockMvcRequestBuilders.post("/stores").content(storeJson)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isCreated).andReturn()
-
-        return response.response.redirectedUrl
-    }
-
-    fun saveStore(): Long{
-        val storeJson = "{\"name\" : \"Test\"}"
-
-        val response = mockMvc.perform(
-            MockMvcRequestBuilders.post("/stores").content(storeJson)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isCreated).andReturn()
-
+    fun saveStoreWithReturnId(): Long {
+        val response = saveStore()
         return getId(response, "stores")
     }
 
-    fun request(mockRequest: MockHttpServletRequestBuilder, status: ResultMatcher): ResultActions {
+    private fun saveStore(): MvcResult {
+        val storeJson = "{\"name\" : \"Test\"}"
+
         return mockMvc.perform(
-            mockRequest.accept(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.post("/stores").content(storeJson)
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status)
+        )
+            .andExpect(status().isCreated).andReturn()
     }
 }

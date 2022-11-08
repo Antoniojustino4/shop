@@ -90,7 +90,7 @@ class StoreController {
     }
 
     @PostMapping(path = ["/{id}/products"])
-    fun saveProducts(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
+    fun saveProduct(@PathVariable id:Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
         val optional = storeService.findById(id)
         if (optional.isPresent){
             val product = productDto.convert()
@@ -105,7 +105,7 @@ class StoreController {
     }
 
     @PutMapping(path = ["/{id}/products/{idProduct}"]) //TODO PRODUTO É DA LOJA?
-    fun replaceProducts(@PathVariable id:Long, @PathVariable idProduct: Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
+    fun replaceProduct(@PathVariable id:Long, @PathVariable idProduct: Long, @RequestBody @Valid productDto: ProductDto, uriBuilder: UriComponentsBuilder): Any {
         return try {
             if (storeService.isProductThisStore(id, idProduct)) {
                 val product = productDto.convert(idProduct)

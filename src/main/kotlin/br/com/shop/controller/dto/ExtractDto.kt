@@ -20,7 +20,7 @@ class ExtractDto(extract: Extract):Dto<Extract> {
     }
 
     override fun convert(id: Long): Extract {
-        return Extract(this.balance, this.transactions, id= id)
+        return Extract(this.balance, this.transactions, idExtract = id)
     }
 
     companion object {
