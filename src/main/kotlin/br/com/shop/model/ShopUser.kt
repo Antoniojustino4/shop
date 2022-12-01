@@ -2,7 +2,7 @@ package br.com.shop.model
 
 import br.com.shop.model.user.Address
 import br.com.shop.model.user.Card
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 class ShopUser(

@@ -2,9 +2,9 @@ package br.com.shop.controller.dto
 
 import br.com.shop.model.Cart
 import br.com.shop.model.Product
+import jakarta.validation.constraints.DecimalMin
+import jakarta.validation.constraints.NotNull
 import org.springframework.data.domain.Page
-import javax.validation.constraints.DecimalMin
-import javax.validation.constraints.NotNull
 
 class CartDto(cart: Cart): Dto<Cart> {
     @NotNull(message = "The name field is mandatory")

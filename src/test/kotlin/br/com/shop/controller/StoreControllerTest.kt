@@ -1,6 +1,7 @@
 package br.com.shop.controller
 
 import br.com.shop.Utils
+import br.com.shop.exception.ProductIsNotOfThisStoreException
 import org.hamcrest.Matchers.contains
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -19,18 +19,18 @@ import java.net.URI
 @ActiveProfiles("test")
 class StoreControllerTest(
     @Autowired
-    val mockMvc: MockMvc
+    val utils: Utils
 ) {
 
     private var id: Long = 0
     private val url = URI("/stores")
-    private val utils = Utils(mockMvc)
 
     private fun saveStore() {
-        id = utils.saveStoreWithReturnId()
+        id = utils.saveStore().id
     }
 
     private fun urlProducts(): URI {
+        saveStore()
         return URI("/stores/$id/products")
     }
 
@@ -59,10 +59,10 @@ class StoreControllerTest(
         val name = "Test"
         val storeJson = "{\"name\" : \"$name\"}"
 
-        val response = utils.request(post("$url").content(storeJson), status().isCreated)
+        val result = utils.request(post("$url").content(storeJson), status().isCreated)
             .andExpect(jsonPath("$.name").isNotEmpty)
             .andExpect(jsonPath("$.name").value(name)).andReturn()
-        val redirectedUrl = response.response.redirectedUrl
+        val redirectedUrl = result.response.redirectedUrl
 
         Assertions.assertNotNull(redirectedUrl)
     }
@@ -70,34 +70,37 @@ class StoreControllerTest(
     @Test
     fun `should not save with name empty`() {
         val storeJson = "{\"name\" : \"\"}"
-        val response = utils.request(post("$url").content(storeJson), status().isBadRequest).andReturn()
-        Assertions.assertTrue(response.response.contentAsString.contains("The name field is mandatory"))
+        val result = utils.request(post("$url").content(storeJson), status().isBadRequest).andReturn()
+        Assertions.assertTrue(result.response.contentAsString.contains("The name field is mandatory"))
     }
 
     @Test
     fun `replace store with success`() {
-        val response = utils.request(post("$url").content(utils.storeJson), status().isCreated).andReturn()
-        val redirectedUrl = response.response.redirectedUrl
-        val id = redirectedUrl.toString().split("/")[4]
+        val result = utils.request(post("$url").content(utils.storeJson), status().isCreated).andReturn()
+        val redirectedUrl = result.response.redirectedUrl
+        val id = utils.getId(redirectedUrl)
 
         Assertions.assertNotNull(redirectedUrl)
         Assertions.assertNotNull(id)
 
         val storeEdited = "{\"name\" : \"otherTest\"}"
-        utils.request(put("$redirectedUrl").content(storeEdited), status().isNoContent)
+        val otherResult= utils.request(put("$redirectedUrl").content(storeEdited), status().isNoContent)
             .andExpect(jsonPath(".id", contains(id.toInt())))
-            .andExpect(jsonPath("$.name").value("otherTest"))
+            .andExpect(jsonPath("$.name").value("otherTest")).andReturn()
+
+        val storeSaved = otherResult.response.contentAsString.split("\"", ":", ",")
+        Assertions.assertTrue(storeSaved.contains("otherTest"))
     }
 
     @Test
     fun `should not replace with id non-existent`() {
-        val otherResponse = utils.request(put("$url/-1").content(utils.storeJson), status().isNotFound).andReturn()
-        Assertions.assertTrue(otherResponse.response.contentAsString.contains("The searched id does not exist"))
+        val result = utils.request(put("$url/-1").content(utils.storeJson), status().isNotFound).andReturn()
+        Assertions.assertTrue(result.response.contentAsString.contains("The searched id does not exist"))
     }
 
     @Test
     fun `find all products by idStore`() {
-        val listId = utils.saveObjectsWithReturnId()
+        val listId = utils.saveObjectsWithReturnIds()
 
         if (listId.isEmpty()) {
             Assertions.fail<String>()
@@ -117,11 +120,9 @@ class StoreControllerTest(
             .andExpect(jsonPath("content").isEmpty)
     }
 
-    //todo renomear os metodos
-
     @Test
     fun `find product by id corresponding id store`() {
-        val listId = utils.saveObjectsWithReturnId()
+        val listId = utils.saveObjectsWithReturnIds()
 
         if (listId.isEmpty()) {
             Assertions.fail<String>()
@@ -135,16 +136,12 @@ class StoreControllerTest(
 
     @Test
     fun `return empty in get by idProduct by idStore non-existent`() {
-        saveStore()
-
         utils.request(get("${urlProducts()}/-1"), status().isNotFound)
     }
 
 
     @Test
     fun `save store with product`() {
-        saveStore()
-
         val result = utils.request(post(urlProducts()).content(utils.productJson), status().isCreated)
             .andReturn()
 
@@ -156,90 +153,84 @@ class StoreControllerTest(
         val productJson = "{\"name\" : \"\", \"description\" : \"Red\", \"price\" : 1.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
 
-        val response = utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
+        val result = utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
             .andReturn()
 
-        Assertions.assertTrue(response.response.contentAsString.contains("The name field is mandatory"))
+        Assertions.assertTrue(result.response.contentAsString.contains("The name field is mandatory"))
     }
 
     @Test
     fun `try save product with field description empty`() {
         val productJson = "{\"name\" : \"Pan\", \"description\" : \"\", \"price\" : 1.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
-        val response = utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
+        val result = utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
             .andReturn()
 
-        Assertions.assertTrue(response.response.contentAsString.contains("The description field is mandatory"))
+        Assertions.assertTrue(result.response.contentAsString.contains("The description field is mandatory"))
     }
 
-//    @Test
-//    fun `Post with field price empty`() {
-//        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : ," +
-//                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
-//        response = mockMvc.perform(
-//            post(url).content(productJson)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isBadRequest)
-//            .andReturn()
-//
-//        mockMvc.perform(
-//            get(url)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isOk)
-//    }
-//
-//    @Test
-//    fun `Post with field price negative`() {
-//        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1," +
-//                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
-//        response = mockMvc.perform(
-//            post(url).content(productJson)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isBadRequest)
-//            .andExpect(jsonPath("$.fields").value("price"))
-//            .andReturn()
-//
-//        mockMvc.perform(
-//            get(url)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isOk)
-//    }
-//
-//    @Test
-//    fun `Post with field imageUrl empty`() {
-//        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
-//                "\"imageUrl\" : \"\"}"
-//        response = mockMvc.perform(
-//            post(url).content(productJson)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isBadRequest)
-//            .andExpect(jsonPath("$.fields").value("imageUrl"))
-//            .andReturn()
-//
-//        mockMvc.perform(
-//            get(url)
-//                .accept(APPLICATION_JSON)
-//                .contentType(APPLICATION_JSON)
-//        )
-//            .andExpect(status().isOk)
-//    }
+    @Test
+    fun `try save product with field price empty`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : ," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
+    }
+
+    @Test
+    fun `try save product with field price negative`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1.0," +
+                "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+        val result= utils.request(post(urlProducts()).content(productJson), status().isBadRequest).andReturn()
+
+        Assertions.assertTrue(result.response.contentAsString.contains("The price field cannot is smaller that one"))
+    }
+
+    @Test
+    fun `try save product with field imageUrl empty`() {
+        val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1.0," +
+                "\"imageUrl\" : \"\"}"
+        val result= utils.request(post(urlProducts()).content(productJson), status().isBadRequest).andReturn()
+
+        Assertions.assertTrue(result.response.contentAsString.contains("The imageUrl field is mandatory"))
+    }
+
+    @Test
+    fun `replace product `(){
+        val urlProducts = urlProducts()
+        val result = utils.request(post(urlProducts).content(utils.productJson), status().isCreated)
+            .andReturn()
+
+        val url = result.response.redirectedUrl
+        val id = utils.getId(url)
+
+        Assertions.assertNotNull(url)
+
+        val productJson = "{\"name\": \"Hat\", \"description\": \"Red hat\", \"price\": 12.0," +
+                "\"imageUrl\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+
+        val otherResult = utils.request(put("$urlProducts/$id").content(productJson), status().isNoContent).andReturn()
+
+        // todo leva esse assertion para outros
+
+        // todo criar no utils um assertions
+        val productSaved = otherResult.response.contentAsString.split("\"", ":", ",")
+        Assertions.assertTrue(productSaved.contains("Hat"))
+        Assertions.assertTrue(productSaved.contains("Red hat"))
+        Assertions.assertTrue(productSaved.contains("12.0"))
+    }
+
+    @Test
+    fun `replace product with id not-existent`(){
+        val urlProducts = urlProducts()
+        val productJson = "{\"name\": \"Hat\", \"description\": \"Red hat\", \"price\": 12.0," +
+                "\"imageUrl\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
+
+        utils.request(put("$urlProducts/1").content(productJson), status().isNotFound)
+    }
 
 
 
 
-
-    //fun saveProducts
-    //fun replaceProducts
     //fun status
     //fun extract
     //fun withdraw

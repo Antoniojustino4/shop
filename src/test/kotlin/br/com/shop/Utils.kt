@@ -1,29 +1,34 @@
 package br.com.shop
 
+import br.com.shop.model.Product
+import br.com.shop.repository.StoreRepository
+import org.junit.jupiter.api.Assertions
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import br.com.shop.model.store.Store
 
-
+@Component
 class Utils(
-    private val mockMvc: MockMvc
+    @Autowired
+    private val mockMvc: MockMvc,
+    @Autowired
+    val storeRepository: StoreRepository
 ) {
     val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : 1.0," +
             "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
 
     val storeJson = "{\"name\" : \"Test\"}"
 
-    private fun getId(response: MvcResult, domain: String): Long {
-        val locale = response.response.getHeaderValue("Location").toString()
-
-        val regex = "(/$domain/)([1-9][0-9]?[0-9]?)".toRegex()
-        val matchResult: MatchResult? = regex.find(locale)
-        return matchResult?.groupValues?.get(2)?.toLong() ?: 0
+    fun getId(url: String?): String {
+        if (url != null) {
+            return url.split("/")[4]
+        }
+        return Assertions.fail()
     }
 
     fun request(mockRequest: MockHttpServletRequestBuilder, status: ResultMatcher): ResultActions {
@@ -33,44 +38,34 @@ class Utils(
         ).andExpect(status)
     }
 
-
-    fun saveObjectsWithReturnId(): List<Long> {
-        val idStore = saveStoreWithReturnId()
-        val idProduct = saveProductWithReturnId(idStore.toString())
-
-        return listOf(idStore, idProduct)
+    fun saveObjectsWithReturnIds(): List<Long> {
+        val storeAndProduct = saveStoreWithProduct()
+        return listOf(storeAndProduct.store.id, storeAndProduct.product.id)
     }
 
     fun saveProductWithReturnId(): Long {
-        val idStore = saveStoreWithReturnId()
-        return saveProductWithReturnId(idStore.toString())
+        val storeAndProduct = saveStoreWithProduct()
+        return storeAndProduct.product.id
     }
 
-    private fun saveProductWithReturnId(idStore: String?): Long {
-        val response = mockMvc.perform(
-            MockMvcRequestBuilders.post("/stores/$idStore/products").content(productJson)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
+    private fun saveStoreWithProduct(): StoreAndProduct {
+        val store = Store("Test")
+        val product = Product(
+            "Pan", "Red pan", 49.99,
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg"
         )
-            .andExpect(status().isCreated).andReturn()
+        store.products.add(product)
+        storeRepository.save(store)
+        return StoreAndProduct(store, product)
+    }
 
-        return getId(response, "products")
+    fun saveStore(): Store {
+        val store = Store("Test")
+
+        return storeRepository.save(store)
     }
 
 
-    fun saveStoreWithReturnId(): Long {
-        val response = saveStore()
-        return getId(response, "stores")
-    }
-
-    private fun saveStore(): MvcResult {
-        val storeJson = "{\"name\" : \"Test\"}"
-
-        return mockMvc.perform(
-            MockMvcRequestBuilders.post("/stores").content(storeJson)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isCreated).andReturn()
-    }
 }
+
+private class StoreAndProduct(val store: Store, val product: Product)

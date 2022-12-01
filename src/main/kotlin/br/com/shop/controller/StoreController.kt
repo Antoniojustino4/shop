@@ -10,6 +10,7 @@ import br.com.shop.model.store.Store
 import br.com.shop.model.enums.ProductStatus
 import br.com.shop.service.ProductService
 import br.com.shop.service.StoreService
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.*
-import javax.validation.Valid
 
 @RestController
 @ExposesResourceFor(Store::class)

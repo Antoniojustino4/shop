@@ -2,12 +2,8 @@ package br.com.shop.model.store
 
 import br.com.shop.exception.InsufficientBalanceException
 import br.com.shop.model.enums.TypeTransaction
+import jakarta.persistence.*
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
 import kotlin.jvm.Throws
 
 @Entity

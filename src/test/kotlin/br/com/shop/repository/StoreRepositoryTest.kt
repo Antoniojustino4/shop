@@ -94,14 +94,18 @@ class StoreRepositoryTest(
     fun `find product non-existent from store`(){
         repository.save(store)
 
-        Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) { findByIdProductByIdStore(store.id, 0); }
+        Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) {
+            findByIdProductByIdStore(store.id, 0)
+        }
     }
 
     @Test
     fun `find product of one store non-existent`(){
         repository.save(store)
 
-        Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) { findByIdProductByIdStore(0, product.id); }
+        Assertions.assertThrows(ProductIsNotOfThisStoreException::class.java) {
+            findByIdProductByIdStore(0, product.id);
+        }
     }
 
     @Test
@@ -129,7 +133,9 @@ class StoreRepositoryTest(
 
     @Test
     fun `find extract from store id not-existent`(){
-        Assertions.assertThrows(EmptyResultDataAccessException::class.java){repository.findExtractById(0)}
+        Assertions.assertThrows(EmptyResultDataAccessException::class.java){
+            repository.findExtractById(0)
+        }
     }
 
     @Test

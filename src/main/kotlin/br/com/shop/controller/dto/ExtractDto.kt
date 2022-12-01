@@ -2,8 +2,8 @@ package br.com.shop.controller.dto
 
 import br.com.shop.model.store.Extract
 import br.com.shop.model.store.Transaction
+import jakarta.validation.constraints.DecimalMin
 import org.springframework.data.domain.Page
-import javax.validation.constraints.DecimalMin
 
 class ExtractDto(extract: Extract):Dto<Extract> {
     @DecimalMin(value = "0.01", message = "The price field cannot is smaller that one")

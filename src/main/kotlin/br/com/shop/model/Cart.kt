@@ -1,6 +1,6 @@
 package br.com.shop.model
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 class Cart(

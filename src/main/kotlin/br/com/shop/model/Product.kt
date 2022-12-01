@@ -1,7 +1,7 @@
 package br.com.shop.model
 
 import br.com.shop.model.enums.ProductStatus
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 class Product(

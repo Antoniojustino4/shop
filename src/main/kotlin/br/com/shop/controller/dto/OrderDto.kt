@@ -2,8 +2,8 @@ package br.com.shop.controller.dto
 
 import br.com.shop.model.Cart
 import br.com.shop.model.Order
+import jakarta.validation.constraints.NotEmpty
 import org.springframework.data.domain.Page
-import javax.validation.constraints.NotEmpty
 
 class OrderDto(order: Order):Dto<Order> {
     @NotEmpty(message = "The carts field is mandatory")

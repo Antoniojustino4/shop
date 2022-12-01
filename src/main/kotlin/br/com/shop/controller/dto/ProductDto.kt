@@ -1,9 +1,8 @@
 package br.com.shop.controller.dto
 
 import br.com.shop.model.Product
+import jakarta.validation.constraints.*
 import org.springframework.data.domain.Page
-import javax.validation.constraints.DecimalMin
-import javax.validation.constraints.NotBlank
 
 class ProductDto(product: Product):Dto<Product> {
     @NotBlank(message = "The name field is mandatory")

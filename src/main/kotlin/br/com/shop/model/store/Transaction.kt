@@ -1,7 +1,7 @@
 package br.com.shop.model.store
 
 import br.com.shop.model.enums.TypeTransaction
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 class Transaction(

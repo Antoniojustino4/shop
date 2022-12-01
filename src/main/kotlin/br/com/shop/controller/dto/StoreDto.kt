@@ -3,8 +3,8 @@ package br.com.shop.controller.dto
 import br.com.shop.model.Product
 import br.com.shop.model.store.Extract
 import br.com.shop.model.store.Store
+import jakarta.validation.constraints.NotBlank
 import org.springframework.data.domain.Page
-import javax.validation.constraints.NotBlank
 
 class StoreDto(store: Store):Dto<Store> {
     @NotBlank(message = "The name field is mandatory")

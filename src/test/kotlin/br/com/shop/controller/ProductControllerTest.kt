@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -18,11 +17,10 @@ import java.net.URI
 @ActiveProfiles("test")
 class ProductControllerTest(
     @Autowired
-    val mockMvc: MockMvc
+    val utils: Utils
 ) {
     private var id: Long = 0
     private val url = URI("/products")
-    private val utils = Utils(mockMvc)
 
     fun saveProduct() {
         id = utils.saveProductWithReturnId()
