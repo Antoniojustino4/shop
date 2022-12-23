@@ -2,7 +2,7 @@ package br.com.shop.model.store
 
 import br.com.shop.exception.InsufficientBalanceException
 import br.com.shop.model.enums.TypeTransaction
-import jakarta.persistence.*
+import javax.persistence.*
 import java.util.*
 import kotlin.jvm.Throws
 

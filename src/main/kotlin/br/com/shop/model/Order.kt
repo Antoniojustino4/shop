@@ -2,7 +2,7 @@ package br.com.shop.model
 
 import br.com.shop.model.enums.OrderStatus
 import java.time.LocalDate
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
 @Table(name = "order_table")

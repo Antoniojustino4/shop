@@ -1,6 +1,7 @@
 package br.com.shop
 
 import br.com.shop.model.Product
+import br.com.shop.model.enums.TypeTransaction
 import br.com.shop.repository.StoreRepository
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import br.com.shop.model.store.Store
+import br.com.shop.model.store.Transaction
 
 @Component
 class Utils(
@@ -63,6 +65,18 @@ class Utils(
         val store = Store("Test")
 
         return storeRepository.save(store)
+    }
+
+    fun saveStoreWithBalance(value: Double): Store {
+        val store = Store("Test")
+
+        storeRepository.save(store)
+
+        store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, value))
+
+        storeRepository.withdraw(store.id, (value * -1))
+
+        return store
     }
 
 

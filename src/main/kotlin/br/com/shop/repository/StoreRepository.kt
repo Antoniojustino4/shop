@@ -40,6 +40,12 @@ interface StoreRepository: JpaRepository<Store, Long> {
             "(SELECT s.extract FROM Store s WHERE s.id= :id)")
      fun withdraw(@Param("id") id: Long,@Param("value") value: Double): Int
 
+
+     //TODO
+    @Transactional
+    @Query("SELECT e.balance > :value FROM Store s, Extract e WHERE s.id = :id AND e.id = s.extract.id")
+     fun isSaldo(@Param("id") id: Long,@Param("value") value: Double): Boolean
+
 //    @Transactional
 //    @Modifying
 //    @Query("UPDATE Extract e SET e.balance= e.balance -:value WHERE e.id = " +

@@ -1,7 +1,7 @@
 package br.com.shop.model.user
 
 import br.com.shop.model.enums.State
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
 class Address(

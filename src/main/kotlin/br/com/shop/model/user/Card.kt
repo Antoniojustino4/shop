@@ -1,7 +1,7 @@
 package br.com.shop.model.user
 
 import java.time.LocalDate
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
 class Card(

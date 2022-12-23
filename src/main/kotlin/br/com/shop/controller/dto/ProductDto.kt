@@ -1,7 +1,7 @@
 package br.com.shop.controller.dto
 
 import br.com.shop.model.Product
-import jakarta.validation.constraints.*
+import javax.validation.constraints.*
 import org.springframework.data.domain.Page
 
 class ProductDto(product: Product):Dto<Product> {

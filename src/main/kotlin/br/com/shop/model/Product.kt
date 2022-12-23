@@ -1,20 +1,38 @@
 package br.com.shop.model
 
 import br.com.shop.model.enums.ProductStatus
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
-class Product(
-    var name: String,
-    var description: String,
-    var price: Double,
-    var imageUrl: String,
+class Product(){
+    lateinit var name: String
+    lateinit var description: String
+    var price: Double = 0.0
+    lateinit var imageUrl: String
     @Enumerated(EnumType.STRING)
-    var status: ProductStatus = ProductStatus.AVAILABLE,
+    var status: ProductStatus = ProductStatus.AVAILABLE
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
-){
+    var id: Long = 0
+
+    constructor(name: String, description: String, price: Double, imageUrl: String) : this() {
+        this.name = name
+        this.description = description
+        this.price = price
+        this.imageUrl = imageUrl
+    }
+
+    constructor(name: String, description: String, price: Double, imageUrl: String, status: ProductStatus) : this(name, description, price, imageUrl){
+        this.status = status
+    }
+
+    constructor(name: String, description: String, price: Double, imageUrl: String, status: ProductStatus, id: Long) : this(name, description, price, imageUrl, status){
+        this.id = id
+    }
+
+    constructor(name: String, description: String, price: Double, imageUrl: String, id: Long) : this(name, description, price, imageUrl) {
+        this.id = id
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

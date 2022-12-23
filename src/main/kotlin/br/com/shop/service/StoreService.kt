@@ -47,12 +47,12 @@ class StoreService {
         }
         val list = productString.split(",")
         return Product(
-            list[3],
-            list[1],
-            list[4].toDouble(),
-            list[2],
-            ProductStatus.convert(list[5]),
-            list[0].toLong(),
+                list[3],
+                list[1],
+                list[4].toDouble(),
+                list[2],
+                ProductStatus.convert(list[5]),
+                list[0].toLong(),
         )
     }
 
@@ -63,12 +63,11 @@ class StoreService {
     }
 
     @Throws(IdNoExistException::class, InsufficientBalanceException::class)
-    fun withdraw(id: Long, value: Double) {
+    fun withdraw(id: Long, value: Double): Extract {
         validId(id)
-        val returned = storeRepository.withdraw(id, value)
-        if (returned != 1){
-            throw InsufficientBalanceException()
-        }
+        possuiSaldo(id, value)
+        storeRepository.withdraw(id, value)
+        return storeRepository.findExtractById(id)
     }
 
     @Throws(IdNoExistException::class)
@@ -77,9 +76,13 @@ class StoreService {
             storeRepository.save(store)
         } else {
             validId(store.id)
-            store.extract= storeRepository.findExtractById(store.id)
+            store.extract = storeRepository.findExtractById(store.id)
             storeRepository.save(store)
         }
+    }
+
+    fun updateOrderStatus(id: Long, idOrder: Long, status: OrderStatus) {
+        //storeRepository.updateOrderStatus(id, idOrder, status)
     }
 
     fun delete(id: Long) {
@@ -93,13 +96,21 @@ class StoreService {
         }
     }
 
-    fun updateOrderStatus(id: Long, idOrder: Long, status: OrderStatus) {
-        //storeRepository.updateOrderStatus(id, idOrder, status)
+
+    //todo colocar em ingles
+    @Throws(InsufficientBalanceException::class)
+    private fun possuiSaldo(id: Long, value: Double) {
+        val isSaldo = storeRepository.isSaldo(id, value)
+        if (!isSaldo) {
+            throw InsufficientBalanceException()
+        }
     }
 
     @Throws(IdNoExistException::class)
-    fun isProductThisStore(id: Long, idProduct: Long): Boolean {
+    fun isProductThisStore(id: Long, idProduct: Long) {
         validId(id)
-        return storeRepository.isProductThisStore(id, idProduct)
+        if (!storeRepository.isProductThisStore(id, idProduct)) {
+            ProductIsNotOfThisStoreException(this.javaClass.name)
+        }
     }
 }

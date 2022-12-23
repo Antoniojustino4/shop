@@ -2,7 +2,7 @@ package br.com.shop.controller.dto
 
 import br.com.shop.model.Cart
 import br.com.shop.model.Order
-import jakarta.validation.constraints.NotEmpty
+import javax.validation.constraints.NotEmpty
 import org.springframework.data.domain.Page
 
 class OrderDto(order: Order):Dto<Order> {

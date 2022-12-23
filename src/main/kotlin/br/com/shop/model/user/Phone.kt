@@ -1,6 +1,6 @@
 package br.com.shop.model.user
 
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
 class Phone(

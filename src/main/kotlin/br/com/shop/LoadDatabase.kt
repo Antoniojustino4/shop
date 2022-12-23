@@ -60,12 +60,15 @@ internal class LoadDatabase {
                 arrayListOf(product3,product4))
 
 //            store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 200.0))
-//            storeRepository.save(store)
-//            storeRepository.save(store2)
+            storeRepository.save(store)
+            storeRepository.save(store2)
 //            println("aaaaaa")
 //
-//            store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 500.0))
+            println(store.id)
+            store.extract.addTransaction(Transaction(TypeTransaction.DEPOSIT, 500.0))
+            println(store.extract.balance)
 //            storeRepository.save(store)
+            storeRepository.withdraw(store.id, -500.0)
 
 //
 //            productRepository.save(product1)

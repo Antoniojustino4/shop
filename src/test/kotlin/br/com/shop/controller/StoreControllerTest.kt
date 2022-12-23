@@ -1,7 +1,6 @@
 package br.com.shop.controller
 
 import br.com.shop.Utils
-import br.com.shop.exception.ProductIsNotOfThisStoreException
 import org.hamcrest.Matchers.contains
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -88,8 +87,8 @@ class StoreControllerTest(
             .andExpect(jsonPath(".id", contains(id.toInt())))
             .andExpect(jsonPath("$.name").value("otherTest")).andReturn()
 
-        val storeSaved = otherResult.response.contentAsString.split("\"", ":", ",")
-        Assertions.assertTrue(storeSaved.contains("otherTest"))
+        val stringList = otherResult.response.contentAsString.split("\"", ":", ",")
+        Assertions.assertTrue(stringList.contains("otherTest"))
     }
 
     @Test
@@ -149,7 +148,7 @@ class StoreControllerTest(
     }
 
     @Test
-    fun `try save product with field name empty`() {
+    fun `should not save product with field name empty`() {
         val productJson = "{\"name\" : \"\", \"description\" : \"Red\", \"price\" : 1.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
 
@@ -160,7 +159,7 @@ class StoreControllerTest(
     }
 
     @Test
-    fun `try save product with field description empty`() {
+    fun `should not save product with field description empty`() {
         val productJson = "{\"name\" : \"Pan\", \"description\" : \"\", \"price\" : 1.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
         val result = utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
@@ -170,14 +169,14 @@ class StoreControllerTest(
     }
 
     @Test
-    fun `try save product with field price empty`() {
+    fun `should not save product with field price empty`() {
         val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : ," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
         utils.request(post(urlProducts()).content(productJson), status().isBadRequest)
     }
 
     @Test
-    fun `try save product with field price negative`() {
+    fun `should not save product with field price negative`() {
         val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1.0," +
                 "\"imageUrl\" : \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
         val result= utils.request(post(urlProducts()).content(productJson), status().isBadRequest).andReturn()
@@ -186,7 +185,7 @@ class StoreControllerTest(
     }
 
     @Test
-    fun `try save product with field imageUrl empty`() {
+    fun `should not save product with field imageUrl empty`() {
         val productJson = "{\"name\" : \"Pan\", \"description\" : \"Red\", \"price\" : -1.0," +
                 "\"imageUrl\" : \"\"}"
         val result= utils.request(post(urlProducts()).content(productJson), status().isBadRequest).andReturn()
@@ -195,7 +194,7 @@ class StoreControllerTest(
     }
 
     @Test
-    fun `replace product `(){
+    fun `replace product`(){
         val urlProducts = urlProducts()
         val result = utils.request(post(urlProducts).content(utils.productJson), status().isCreated)
             .andReturn()
@@ -210,13 +209,10 @@ class StoreControllerTest(
 
         val otherResult = utils.request(put("$urlProducts/$id").content(productJson), status().isNoContent).andReturn()
 
-        // todo leva esse assertion para outros
-
-        // todo criar no utils um assertions
-        val productSaved = otherResult.response.contentAsString.split("\"", ":", ",")
-        Assertions.assertTrue(productSaved.contains("Hat"))
-        Assertions.assertTrue(productSaved.contains("Red hat"))
-        Assertions.assertTrue(productSaved.contains("12.0"))
+        val stringList = otherResult.response.contentAsString.split("\"", ":", ",")
+        Assertions.assertTrue(stringList.contains("Hat"))
+        Assertions.assertTrue(stringList.contains("Red hat"))
+        Assertions.assertTrue(stringList.contains("12.0"))
     }
 
     @Test
@@ -225,13 +221,52 @@ class StoreControllerTest(
         val productJson = "{\"name\": \"Hat\", \"description\": \"Red hat\", \"price\": 12.0," +
                 "\"imageUrl\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg\"}"
 
-        utils.request(put("$urlProducts/1").content(productJson), status().isNotFound)
+        utils.request(put("$urlProducts/-1").content(productJson), status().isNotFound)
     }
 
+    @Test
+    fun `change status`(){
+        val store = utils.saveObjectsWithReturnIds()
 
+        utils.request(patch("$url/${store[0]}/products/${store[1]}/changeStatus").content("\"UNAVAILABLE\""), status().isOk)
+    }
 
+    @Test
+    fun `get extract`(){
+        saveStore()
 
-    //fun status
-    //fun extract
-    //fun withdraw
+        val result = utils.request(get("$url/$id/extract"), status().isOk).andReturn()
+
+        Assertions.assertTrue(result.response.contentAsString.contains("balance"))
+    }
+
+    @Test
+    fun `to do withdraw`(){
+        val value = 500.0
+        val withdraw= 100.0
+        val store = utils.saveStoreWithBalance(value)
+
+       val result = utils.request(patch("$url/${store.id}/extract/withdraw").content("{\"balance\": $withdraw}"), status().isNoContent).andReturn()
+
+        Assertions.assertTrue(result.response.contentAsString.contains("balance"))
+
+        val stringList = result.response.contentAsString.split("\"", ":", ",", "}")
+
+        Assertions.assertEquals(stringList[3].toDouble(), (value-withdraw))
+    }
+
+    @Test
+    fun `to do withdraw with value bigger than balance`(){
+        val value = 500.0
+        val withdraw= 600.0
+        val store = utils.saveStoreWithBalance(value)
+
+        val result = utils.request(patch("$url/${store.id}/extract/withdraw").content("{\"balance\": $withdraw}"), status().isNotFound).andReturn()
+
+        //todo mudar todos os nomes das variaveis que tem split
+        val stringList = result.response.contentAsString.split("\"", ":", ",", "}")
+
+        Assertions.assertTrue(stringList.contains("Insufficient Balance exception"))
+    }
+    
 }
