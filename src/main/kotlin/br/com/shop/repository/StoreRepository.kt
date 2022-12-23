@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import org.springframework.transaction.annotation.Transactional
@@ -40,11 +39,9 @@ interface StoreRepository: JpaRepository<Store, Long> {
             "(SELECT s.extract FROM Store s WHERE s.id= :id)")
      fun withdraw(@Param("id") id: Long,@Param("value") value: Double): Int
 
-
-     //TODO
     @Transactional
     @Query("SELECT e.balance > :value FROM Store s, Extract e WHERE s.id = :id AND e.id = s.extract.id")
-     fun isSaldo(@Param("id") id: Long,@Param("value") value: Double): Boolean
+     fun hasBalance(@Param("id") id: Long, @Param("value") value: Double): Boolean
 
 //    @Transactional
 //    @Modifying

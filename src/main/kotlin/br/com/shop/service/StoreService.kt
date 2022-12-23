@@ -65,7 +65,7 @@ class StoreService {
     @Throws(IdNoExistException::class, InsufficientBalanceException::class)
     fun withdraw(id: Long, value: Double): Extract {
         validId(id)
-        possuiSaldo(id, value)
+        hasBalance(id, value)
         storeRepository.withdraw(id, value)
         return storeRepository.findExtractById(id)
     }
@@ -97,11 +97,10 @@ class StoreService {
     }
 
 
-    //todo colocar em ingles
     @Throws(InsufficientBalanceException::class)
-    private fun possuiSaldo(id: Long, value: Double) {
-        val isSaldo = storeRepository.isSaldo(id, value)
-        if (!isSaldo) {
+    private fun hasBalance(id: Long, value: Double) {
+        val isBalance = storeRepository.hasBalance(id, value)
+        if (!isBalance) {
             throw InsufficientBalanceException()
         }
     }
@@ -110,7 +109,7 @@ class StoreService {
     fun isProductThisStore(id: Long, idProduct: Long) {
         validId(id)
         if (!storeRepository.isProductThisStore(id, idProduct)) {
-            ProductIsNotOfThisStoreException(this.javaClass.name)
+            throw ProductIsNotOfThisStoreException(this.javaClass.name)
         }
     }
 }

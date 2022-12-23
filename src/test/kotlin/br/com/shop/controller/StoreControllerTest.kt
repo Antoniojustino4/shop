@@ -263,7 +263,6 @@ class StoreControllerTest(
 
         val result = utils.request(patch("$url/${store.id}/extract/withdraw").content("{\"balance\": $withdraw}"), status().isNotFound).andReturn()
 
-        //todo mudar todos os nomes das variaveis que tem split
         val stringList = result.response.contentAsString.split("\"", ":", ",", "}")
 
         Assertions.assertTrue(stringList.contains("Insufficient Balance exception"))
