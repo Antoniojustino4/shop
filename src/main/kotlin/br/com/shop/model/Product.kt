@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 class Product(){
-    lateinit var name: String
+    var name: String = ""
     lateinit var description: String
     var price: Double = 0.0
     lateinit var imageUrl: String

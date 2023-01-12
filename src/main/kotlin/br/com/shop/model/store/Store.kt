@@ -1,5 +1,6 @@
 package br.com.shop.model.store
 
+import br.com.shop.model.Order
 import br.com.shop.model.Product
 import javax.persistence.*
 
@@ -8,6 +9,8 @@ class Store() {
     lateinit var name: String
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     val products: MutableList<Product> = mutableListOf()
+    @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
+    val orders: MutableList<Order> = mutableListOf()
     @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     var extract: Extract = Extract()
     @Id

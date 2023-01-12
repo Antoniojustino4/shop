@@ -7,14 +7,26 @@ import java.util.*
 import kotlin.jvm.Throws
 
 @Entity
-class Extract(
-    var balance: Double = 0.0,
+class Extract(){
+    var balance: Double = 0.0
     @OneToMany
-    private val transactions: MutableList<Transaction> = mutableListOf(),
+    private val transactions: MutableList<Transaction> = mutableListOf()
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val idExtract: Long = 0,
-){
+    var idExtract: Long = 0
+
+    constructor(balance: Double) : this() {
+        this.balance = balance
+    }
+
+    constructor(balance: Double, list: List<Transaction>): this(balance){
+        this.transactions.addAll(list)
+    }
+
+    constructor(balance: Double, list: List<Transaction>, id: Long): this(balance){
+        this.transactions.addAll(list)
+        this.idExtract = id
+    }
 
     @Throws(InsufficientBalanceException::class)
     fun addTransaction(transaction: Transaction){

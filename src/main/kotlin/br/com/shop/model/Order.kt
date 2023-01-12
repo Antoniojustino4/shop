@@ -6,22 +6,26 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "order_table")
-class Order(
+class Order(){
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long = 0
     @OneToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
-    val carts: MutableList<Cart> = mutableListOf(),
+    var carts: MutableList<Cart> = mutableListOf()
     @Enumerated(EnumType.STRING)
-    private var status: OrderStatus = OrderStatus.ORDER_MADE,
-    private var date: LocalDate = LocalDate.now(),
-    private var total: Double = 0.0,
-
-) {
+    private var status: OrderStatus = OrderStatus.ORDER_MADE
+    private var date: LocalDate = LocalDate.now()
+    private var total: Double = 0.0
 
     init {
         this.total = calculateTotal()
     }
+
+    constructor(id: Long, carts: MutableList<Cart>) : this() {
+        this.id= id
+        this.carts = carts
+    }
+
     private fun calculateTotal(): Double {
         var total = 0.0
         carts.forEach { c ->
